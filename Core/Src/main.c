@@ -135,8 +135,6 @@ int main(void)
 
   ILI9488_driver_init();
 
-  fill_screen(0xFFFF);
-  HAL_Delay(1000);
   fill_screen1(0xF100);
   HAL_Delay(1000);
   fill_screen2(0xF00F);

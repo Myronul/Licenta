@@ -95,15 +95,10 @@ volatile extern uint8_t flagDmaSpiRx;
 void ILI9488_driver_init();
 void LCD_send_command(uint8_t cmd);
 void LCD_send_data_multi(uint8_t *data, unsigned int size);
-void set_adress_window(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, char x);
-void write_color(uint16_t color);
-void draw_pixel(uint16_t x, uint16_t y, uint16_t color);
-void convert_color_16_to_18(uint16_t color, uint8_t *pixel);
 void LCD_send_data(uint8_t data);
+void set_adress_window(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, char x);
 void read_pixel_frame(uint16_t x0, uint16_t y0, uint16_t x, uint16_t y, uint8_t*data);
 void read_pixel_format();
-void fill_screen(uint16_t color);
-void fill_screen1(uint16_t color);
-void fill_screen2(uint16_t color);
+
 
 #endif /* __LCD_H__ */

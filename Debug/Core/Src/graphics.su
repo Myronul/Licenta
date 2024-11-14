@@ -1,6 +1,9 @@
-../Core/Src/graphics.c:12:6:print_character	48	static
-../Core/Src/graphics.c:54:6:print_string	48	static
-../Core/Src/graphics.c:80:6:draw_horizontal_line	40	static
-../Core/Src/graphics.c:104:6:draw_vertical_line	40	static
-../Core/Src/graphics.c:129:6:define_entity	16	static
-../Core/Src/graphics.c:148:6:create_square	4	static
+../Core/Src/graphics.c:10:6:convert_color_16_to_18	24	static
+../Core/Src/graphics.c:39:6:write_color	24	static
+../Core/Src/graphics.c:66:6:draw_pixel	32	static
+../Core/Src/graphics.c:88:6:fill_screen1	40	static
+../Core/Src/graphics.c:134:6:fill_screen2	88	dynamic
+../Core/Src/graphics.c:186:6:print_character	48	static
+../Core/Src/graphics.c:228:6:print_string	48	static
+../Core/Src/graphics.c:254:6:draw_horizontal_line	40	static
+../Core/Src/graphics.c:278:6:draw_vertical_line	40	static

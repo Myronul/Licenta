@@ -47,7 +47,6 @@ void LCD_send_data_multi(uint8_t *data, unsigned int size)
 	{
 		//flagDmaSpiTx = 0;
 		//HAL_SPI_Transmit_DMA(&hspi1, data, size);
-
 		HAL_SPI_Transmit(&hspi1, data, size, HAL_MAX_DELAY);
 	}
 
@@ -221,34 +220,6 @@ void ILI9488_driver_init()
 
 
 
-void convert_color_16_to_18(uint16_t color, uint8_t *pixel)
-{
-	/*
-	 * Functie de conversie a culorii de la 16 biti la 24 de biti
-	 * Vom folosi un algoritm simplu matematic pentru a obtine
-	 * valoarea asociata, in raport binar
-	 * Input: Culaorea pe 16 biti, pointerul in care stocam culorile noi
-	 * Output: Void
-	 */
-
-	uint8_t r,g,b;
-
-	r = (color & 0xF800) >> 11;
-	g = (color & 0x07E0) >> 5;
-	b = color & 0x001F;
-
-	//16bit->18bit extindere respectand forma de transmisie
-
-	r = (63*r)/31 << 2;
-	g = (63*g)/63 << 2;
-	b = (63*b)/31 << 2;
-
-	pixel[0] = r;
-	pixel[1] = g;
-	pixel[2] = b;
-
-}
-
 
 void set_adress_window(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, char x)
 {
@@ -289,250 +260,6 @@ void set_adress_window(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, char 
 
 }
 
-void write_color(uint16_t color)
-{
-	/*
-	 * Functie pentru transmiterea culorii aferente,
-	 * Dupa selectarea ferestrei de adresare!
-	 * Functia va transforma culorile de pe 16 biti pe 24 biti
-	 * Functia va fi folosita in cadrul functiilor de scriere in memorie
-	 * dupa ce vor fi trimise semnalele CS si DC_DATA
-	 * Parametrii: culoarea pe 16 biti (uint16_t)
-	 * Output: Void
-	 */
-
-
-	uint8_t data[3];
-	convert_color_16_to_18(color, data);
-
-	//flagDmaSpiTx = 0;
-
-	//HAL_SPI_Transmit_DMA(&hspi1, data, 3);
-
-	//while(flagDmaSpiTx == 0);
-	HAL_SPI_Transmit(&hspi1, data, 3, HAL_MAX_DELAY);
-
-
-}
-
-
-
-void draw_pixel(uint16_t x, uint16_t y, uint16_t color)
-{
-	/*
-	 * Functie pentru afisarea unui pixel pe ecran.
-	 * Parametrii: Coordonatele (x,y) si culoarea
-	 * Output: Void
-	 */
-
-	set_adress_window(x,y,x,y, 'w');
-
-	DC_DATA();
-	CS_A();
-
-	write_color(color);
-
-	CS_D();
-
-}
-
-
-
-void fill_screen(uint16_t color)
-{
-	/*
-	 * Functie pentru a colora intreg ecranul cu o singura culoare.
-	 * Input: Culoare pe 16 biti ce va fi interpolata la 24 de biti
-	 * Output: Void
-	 */
-
-	unsigned int nrPixel = LCD_Width*LCD_Length;  //numarul total de pixeli
-	unsigned int nrBytes = nrPixel * 3;	          //numarul de Octeti de trimis
-
-	uint32_t i = 0;
-
-	uint8_t r,g,b;
-
-	r = (color & 0xF800) >> 11;
-	g = (color & 0x07E0) >> 5;
-	b = color & 0x001F;
-
-	//16bit->24bit extindere
-
-	r = (255*r)/31;
-	g = (255*g)/63;
-	b = (255*b)/31;
-
-	//vom imparti informatia in cadre
-
-	uint32_t bufSize = 65535;
-	uint32_t k = 0;
-
-	if(nrBytes <= 65535)
-	{
-		bufSize = nrBytes;
-		k = 1;
-	}
-
-	else
-	{
-		k = nrBytes/65535;  //numarul de frames de trimis
-
-		if(nrBytes % 65535 != 0)
-		{
-			k++;  //daca nu este divizor mai adaugam inca un transfer pentru rest
-		}
-
-		bufSize = 65535;
-	}
-
-
-	uint8_t frame[bufSize]; //acest singur frame il vom transmite de k ori
-
-
-	for(i=0; i<bufSize/3; i++)
-	{
-		frame[i*3] = r;
-		frame[i*3+1] = g;
-		frame[i*3+2] = b;
-	}
-
-	//am populat frame-ul pe o perioada cu valorile rgb
-
-	set_adress_window(0, 0, LCD_Width-1, LCD_Length-1, 'w');
-
-	DC_DATA();
-	CS_A();
-
-	for(i=0; i<k; i++)
-	{
-		uint32_t bytesToSend;
-
-		if(i == k-1)
-		{
-			//ultima transmitere
-			bytesToSend = nrBytes % 65535;
-
-			if(bytesToSend == 0)
-			{
-				bytesToSend = bufSize;
-			}
-		}
-
-		else
-		{
-			bytesToSend = bufSize;
-		}
-
-
-		HAL_SPI_Transmit(&hspi1, frame, bytesToSend, HAL_MAX_DELAY);
-
-
-	}
-
-	CS_D();
-
-
-}
-
-
-
-void fill_screen1(uint16_t color)
-{
-	/*
-	 * Functie pentru a colora ecranul intr-un mod mai eficient.
-	 * Vom transmite cate o linie pe rand, un frame de date fiind
-	 * practic o linie a ecranului de 320*3 octeti
-	 * Input: Culoare pe 16 biti
-	 * Output: Void
-	 */
-	uint8_t r,g,b;
-
-	r = (color & 0xF800) >> 11;
-	g = (color & 0x07E0) >> 5;
-	b = color & 0x001F;
-
-	r = (255*r)/31;
-	g = (255*g)/63;
-	b = (255*b)/31;
-
-	uint8_t pixel[] = {r,g,b};
-	uint8_t *line = malloc(320*sizeof(pixel));
-
-	set_adress_window(0, 0, LCD_Width-1, LCD_Length-1, 'w');
-
-	DC_DATA();
-	CS_A();
-
-	for(uint16_t x=0; x<320; x++)
-	{
-		memcpy(line + x*sizeof(pixel), pixel, sizeof(pixel));
-	}
-
-	for(uint16_t y=0; y<480; y++)
-	{
-
-		HAL_SPI_Transmit(&hspi1, line, 320*sizeof(pixel), HAL_MAX_DELAY);
-
-	}
-
-	free(line);
-
-	CS_D();
-
-}
-
-
-void fill_screen2(uint16_t color)
-{
-	set_adress_window(0, 0, LCD_Width-1, LCD_Length-1, 'w');
-
-	uint32_t frameSize = 1200; //numarul de octeti dintr-un frame
-	uint32_t nrPixel = 320*480;
-
-	uint8_t r,g,b;
-
-	r = (color & 0xF800) >> 11;
-	g = (color & 0x07E0) >> 5;
-	b = color & 0x001F;
-
-	r = (255*r)/31;
-	g = (255*g)/63;
-	b = (255*b)/31;
-
-	DC_DATA();
-	CS_A();
-
-	uint8_t frame[frameSize]; //nr de octeti de trimis intr-o tranmsisiune
-
-	for(uint32_t j=0; j<frameSize; j=j+3)
-	{
-		frame[j] = r;
-		frame[j+1] = g;
-		frame[j+2] = b;
-	}
-
-	uint32_t data = nrPixel * 3; //nr de octeti de trimis
-	uint32_t nrFrames = data / frameSize;
-
-	flagDmaSpiTx = 1;
-
-	for(uint32_t j = 0; j < (nrFrames); j++)
-	{
-		//HAL_SPI_Transmit(&hspi1, frame, frameSize, 10);
-
-		while(flagDmaSpiTx == 0); //asteapta cat timp este 0
-		HAL_SPI_Transmit_DMA(&hspi1, frame, frameSize);
-		flagDmaSpiTx = 0;
-
-	}
-
-	//asteptam sa se finalizeze ultimul transfer -> asteptam flag1
-
-	while(flagDmaSpiTx == 0);
-	CS_D();
-}
-
 
 
 void read_pixel_frame(uint16_t x0, uint16_t y0, uint16_t x, uint16_t y, uint8_t*data)
@@ -543,9 +270,11 @@ void read_pixel_frame(uint16_t x0, uint16_t y0, uint16_t x, uint16_t y, uint8_t*
 	* de transmitere a datelor LCD->MCU.
 	*/
 
-	hspi1.Instance->CR1 &= ~SPI_CR1_SPE;
-	hspi1.Instance->CR1 &= ~SPI_CR1_BR;
-	hspi1.Instance->CR1 |= SPI_BAUDRATEPRESCALER_8;
+	hspi1.Instance->CR1 &= ~SPI_CR1_SPE; //dezactivare temporara SPI
+	hspi1.Instance->CR1 &= ~SPI_CR1_BR;  //resetare valoare BD
+	hspi1.Instance->CR1 |= SPI_BAUDRATEPRESCALER_8; //setare valoare BD prescaler de 8
+
+	hspi1.Instance->CR1 |= SPI_CR1_SPE; //reactivare SPI
 
 
 	flagDmaSpiRx = 0;
@@ -597,8 +326,9 @@ void read_pixel_frame(uint16_t x0, uint16_t y0, uint16_t x, uint16_t y, uint8_t*
     hspi1.Instance->CR1 &= ~SPI_CR1_BR;
     hspi1.Instance->CR1 |= SPI_BAUDRATEPRESCALER_2;
 
-}
+    hspi1.Instance->CR1 |= SPI_CR1_SPE; //reactivare SPI
 
+}
 
 
 void read_pixel_format()
@@ -617,6 +347,9 @@ void read_pixel_format()
 	HAL_UART_Transmit(&huart1, data,3,HAL_MAX_DELAY);
 
 }
+
+
+
 
 
 
