@@ -7,7 +7,7 @@
 
 #include "graphics.h"
 
-
+ENTITY entity;
 
 void print_character(uint16_t x, uint16_t y, char c, uint16_t fontColor, uint16_t backColor)
 {
@@ -126,12 +126,29 @@ void draw_vertical_line(uint16_t x0, uint16_t y0, uint16_t y1, uint16_t color)
 
 
 
+void define_entity(uint8_t form)
+{
+	/*
+	 * Fnctie pentru crearea unei forme geometrice pe ecran
+	 * definita ca o entitate de o anumita forma specifica.
+	 * Fiecare entitate va fi initial incadrata intr-un frame de 8x8 pixeli
+	 */
+
+	entity.x0 = 152;
+	entity.y0 = 232;
+
+	entity.w = entity.x0 + 8;
+	entity.h = entity.y0 + 8;
+
+	entity.form = form;
+
+}
 
 
+void create_square()
+{
 
-
-
-
+}
 
 
 

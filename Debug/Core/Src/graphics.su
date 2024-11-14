@@ -2,3 +2,5 @@
 ../Core/Src/graphics.c:54:6:print_string	48	static
 ../Core/Src/graphics.c:80:6:draw_horizontal_line	40	static
 ../Core/Src/graphics.c:104:6:draw_vertical_line	40	static
+../Core/Src/graphics.c:129:6:define_entity	16	static
+../Core/Src/graphics.c:148:6:create_square	4	static

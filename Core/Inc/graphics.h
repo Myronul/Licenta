@@ -26,8 +26,8 @@ typedef struct ENTITY
 	uint16_t w;
 	uint16_t h;
 
-	uint8_t id;
 	uint8_t form;
+
 
 }ENTITY;
 
