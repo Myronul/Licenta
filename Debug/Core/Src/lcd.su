@@ -1,0 +1,13 @@
+../Core/Src/lcd.c:4:6:LCD_send_command	16	static
+../Core/Src/lcd.c:25:6:LCD_send_data_multi	32	static
+../Core/Src/lcd.c:82:6:LCD_send_data	16	static
+../Core/Src/lcd.c:101:6:ILI9488_driver_init	8	static
+../Core/Src/lcd.c:224:6:convert_color_16_to_18	24	static
+../Core/Src/lcd.c:253:6:set_adress_window	32	static
+../Core/Src/lcd.c:292:6:write_color	24	static
+../Core/Src/lcd.c:320:6:draw_pixel	32	static
+../Core/Src/lcd.c:341:6:fill_screen	88	dynamic
+../Core/Src/lcd.c:440:6:fill_screen1	40	static
+../Core/Src/lcd.c:486:6:fill_screen2	88	dynamic
+../Core/Src/lcd.c:538:6:read_pixel_frame	40	static
+../Core/Src/lcd.c:604:6:read_pixel_format	16	static
