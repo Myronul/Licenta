@@ -1,2 +1,0 @@
-../Core/Src/sdsys.c:15:6:initCardSD	8	static
-../Core/Src/sdsys.c:28:6:readFile	592	static

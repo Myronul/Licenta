@@ -1,7 +1,0 @@
-../Core/Src/lcd.c:4:6:LCD_send_command	16	static
-../Core/Src/lcd.c:25:6:LCD_send_data_multi	32	static
-../Core/Src/lcd.c:81:6:LCD_send_data	16	static
-../Core/Src/lcd.c:100:6:ILI9488_driver_init	8	static
-../Core/Src/lcd.c:224:6:set_adress_window	32	static
-../Core/Src/lcd.c:265:6:read_pixel_frame	40	static
-../Core/Src/lcd.c:334:6:read_pixel_format	16	static

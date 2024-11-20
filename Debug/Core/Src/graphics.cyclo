@@ -1,9 +1,0 @@
-../Core/Src/graphics.c:11:6:convert_color_16_to_18	1
-../Core/Src/graphics.c:40:6:write_color	1
-../Core/Src/graphics.c:67:6:draw_pixel	1
-../Core/Src/graphics.c:89:6:fill_screen1	3
-../Core/Src/graphics.c:135:6:fill_screen2	5
-../Core/Src/graphics.c:187:6:print_character	4
-../Core/Src/graphics.c:229:6:print_string	4
-../Core/Src/graphics.c:255:6:draw_horizontal_line	2
-../Core/Src/graphics.c:279:6:draw_vertical_line	2
