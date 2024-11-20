@@ -32,6 +32,11 @@ extern "C" {
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
+extern SPI_HandleTypeDef hspi1;
+extern UART_HandleTypeDef huart1;
+volatile extern uint8_t flagDmaSpiTx;
+volatile extern uint8_t flagDmaSpiRx;
+
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

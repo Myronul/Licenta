@@ -1,17 +1,12 @@
 #ifndef __LCD_H__
 #define __LCD_H__
 
-#include "stm32f4xx_hal.h"
+#include "main.h"
 #include <math.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
-extern SPI_HandleTypeDef hspi1;
-extern UART_HandleTypeDef huart1;
-volatile extern uint8_t flagDmaSpiTx;
-volatile extern uint8_t flagDmaSpiRx;
 
 //Definire Pini ecran si marimi maxime mod portret
 
@@ -22,7 +17,7 @@ volatile extern uint8_t flagDmaSpiRx;
 #define CS_GPIO_Port GPIOD
 #define RST_Pin GPIO_PIN_6    //RST
 #define RST_GPIO_Port GPIOD
-#define DC_Pin GPIO_PIN_2     //DC
+#define DC_Pin GPIO_PIN_3     //DC
 #define DC_GPIO_Port GPIOD
 
 //Definire MACROS-uri Stari High/Low pentru semnalele RST, CS si DC

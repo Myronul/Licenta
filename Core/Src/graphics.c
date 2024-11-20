@@ -7,6 +7,7 @@
 
 #include "graphics.h"
 
+
 void convert_color_16_to_18(uint16_t color, uint8_t *pixel)
 {
 	/*
