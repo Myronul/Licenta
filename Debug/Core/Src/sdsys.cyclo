@@ -1,2 +1,4 @@
-../Core/Src/sdsys.c:15:6:initCardSD	1
-../Core/Src/sdsys.c:28:6:readFile	1
+../Core/Src/sdsys.c:14:6:init_cardSD	1
+../Core/Src/sdsys.c:27:6:read_file	2
+../Core/Src/sdsys.c:61:14:return_int_value_first_line	3
+../Core/Src/sdsys.c:96:6:read_audio_file	7

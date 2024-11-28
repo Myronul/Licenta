@@ -148,9 +148,6 @@ int main(void)
 
   /* USER CODE BEGIN Init */
 
-  initCardSD();  /*Initializare sistem de fisiere card SD*/
-  ILI9488_driver_init();  /*Initializare driver ecran LCD*/
-
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -171,6 +168,8 @@ int main(void)
   MX_FATFS_Init();
   /* USER CODE BEGIN 2 */
 
+  init_cardSD();  /*Initializare sistem de fisiere card SD*/
+  ILI9488_driver_init();  /*Initializare driver ecran LCD*/
 
   HAL_TIM_Base_Start(&htim2);
   get_sine();
@@ -188,7 +187,15 @@ int main(void)
 
   //Test_SD_Card();
   char *fileData = NULL;
-  readFile("audio/text.txt", fileData);
+  read_file("audio/text.txt", fileData);
+  HAL_Delay(1000);
+
+  uint16_t sampleData[2048];
+
+  read_audio_file("audio/text.txt", sampleData);
+  HAL_Delay(100);
+  read_audio_file("audio/text.txt", sampleData);
+  HAL_Delay(100);
 
   for(uint8_t i=0;i<100;i++)
   {
