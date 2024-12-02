@@ -186,12 +186,23 @@ int main(void)
   HAL_Delay(1000);
 
   //Test_SD_Card();
+  unsigned int startTick = 0;
+  unsigned int endTick = 0;
+  unsigned int getTime = 0;
+
   char *fileData = NULL;
   read_file("audio/text.txt", fileData);
   HAL_Delay(1000);
 
   uint16_t sampleData[2048];
 
+  startTick = HAL_GetTick();
+  read_audio_file("audio/text.txt", sampleData);
+  endTick = HAL_GetTick();
+  getTime = endTick - startTick;
+  HAL_Delay(100);
+  read_audio_file("audio/text.txt", sampleData);
+  HAL_Delay(100);
   read_audio_file("audio/text.txt", sampleData);
   HAL_Delay(100);
   read_audio_file("audio/text.txt", sampleData);
@@ -418,7 +429,7 @@ static void MX_SDIO_SD_Init(void)
   hsd.Init.ClockPowerSave = SDIO_CLOCK_POWER_SAVE_DISABLE;
   hsd.Init.BusWide = SDIO_BUS_WIDE_1B;
   hsd.Init.HardwareFlowControl = SDIO_HARDWARE_FLOW_CONTROL_DISABLE;
-  hsd.Init.ClockDiv = 8;
+  hsd.Init.ClockDiv = 1;
   /* USER CODE BEGIN SDIO_Init 2 */
 
   /* USER CODE END SDIO_Init 2 */
