@@ -64,6 +64,9 @@ UART_HandleTypeDef huart1;
 volatile uint8_t flagDmaSpiTx = 0; /*flaguri pentru transfer DMA prin SPI*/
 volatile uint8_t flagDmaSpiRx = 0;
 
+volatile bool flagDmaDAC = 0; /*Flag pentru DMA pe DAC si bufferele aferente*/
+uint32_t buffer[2048];
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -82,30 +85,66 @@ static void MX_SDIO_SD_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
-{
-	/*
-	 * Functie de CallBack pentru terminarea transferului SPI
-	 * folosind DMA. Odata terminat transferul SPI prin DMA,
-	 * aceasta functia de CallBack se va apela, setandu-ne un flag
-	 * pentru a indica starea acestui transfer de date.
-	 */
 
-	flagDmaSpiTx = 1;
+  void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
+  {
+	  /*
+	   * Functie de CallBack pentru terminarea transferului SPI
+	   * folosind DMA. Odata terminat transferul SPI prin DMA,
+	   * aceasta functia de CallBack se va apela, setandu-ne un flag
+	   * pentru a indica starea acestui transfer de date.
+	   */
 
-}
+	  flagDmaSpiTx = 1;
+
+  }
 
 
-void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi)
-{
-	/*
-	 * Functie de CallBack pentru terminarea receptiei datelor
-	 * prin SPI folosind DMA (analog cu functia HAL_SPI_TxCpltCallback)
-	 */
+  void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi)
+  {
+	  /*
+	   * Functie de CallBack pentru terminarea receptiei datelor
+	   * prin SPI folosind DMA (analog cu functia HAL_SPI_TxCpltCallback)
+	   */
 
-	flagDmaSpiRx = 1;
+	  flagDmaSpiRx = 1;
 
-}
+  }
+
+
+  void HAL_DAC_ConvHalfCpltCallbackCh1(DAC_HandleTypeDef *hdac)
+  {
+      /*
+       * Functie de CallBack pentru finalizare 1/2 din transfer DMA pe DAC
+       */
+
+	  flagDmaDAC = 1;
+
+  }
+
+
+
+  void redare_fisier_audio(char *path)
+  {
+
+	  read_audio_file(path, buffer); /*Citire in prima jumatate a bufferului -> 1024 de elemente*/
+
+	  HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, buffer, 2048, DAC_ALIGN_12B_R);
+
+	  while(1)
+	  {
+		  read_audio_file(path, buffer+1024);
+		  while(flagDmaDAC == 0);
+		  flagDmaDAC = 0;
+		  read_audio_file(path, buffer);
+		  while(flagDmaDAC == 0);
+		  flagDmaDAC = 0;
+
+	  }
+
+	  free(buffer);
+
+  }
 
 
 
@@ -170,10 +209,10 @@ int main(void)
 
   init_cardSD();  /*Initializare sistem de fisiere card SD*/
   ILI9488_driver_init();  /*Initializare driver ecran LCD*/
+  HAL_TIM_Base_Start(&htim2); /*Initializare timer2 pentru trigger DMA pe DAC*/
 
-  HAL_TIM_Base_Start(&htim2);
-  get_sine();
-  HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, sin_val, 100, DAC_ALIGN_12B_R);
+  //get_sine();
+  //HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, sin_val, 100, DAC_ALIGN_12B_R);
 
 
   fill_screen1(0xF100);
@@ -190,16 +229,27 @@ int main(void)
   unsigned int endTick = 0;
   unsigned int getTime = 0;
 
+  redare_fisier_audio("audio/melodie.txt");
+
   char *fileData = NULL;
   read_file("audio/text.txt", fileData);
   HAL_Delay(1000);
 
-  uint16_t sampleData[2048];
+  uint32_t sampleData[1024]; /*23 de ms pentru redare DMA dintre care 7 ms pentru citire din fisier*/
+  	  	  	  	  	  	  	 /*Vor ramane aproximativ 16 ms pentru prelucrarea frame-ului (pentru 1024 de esantioane)*/
 
   startTick = HAL_GetTick();
-  read_audio_file("audio/text.txt", sampleData);
+  read_audio_file("audio/random.txt", sampleData);
   endTick = HAL_GetTick();
   getTime = endTick - startTick;
+
+  HAL_Delay(100);
+
+  startTick = HAL_GetTick();
+  read_audio_file("audio/random.txt", sampleData);
+  endTick = HAL_GetTick();
+  getTime = endTick - startTick;
+
   HAL_Delay(100);
   read_audio_file("audio/text.txt", sampleData);
   HAL_Delay(100);
@@ -429,7 +479,7 @@ static void MX_SDIO_SD_Init(void)
   hsd.Init.ClockPowerSave = SDIO_CLOCK_POWER_SAVE_DISABLE;
   hsd.Init.BusWide = SDIO_BUS_WIDE_1B;
   hsd.Init.HardwareFlowControl = SDIO_HARDWARE_FLOW_CONTROL_DISABLE;
-  hsd.Init.ClockDiv = 1;
+  hsd.Init.ClockDiv = 8;
   /* USER CODE BEGIN SDIO_Init 2 */
 
   /* USER CODE END SDIO_Init 2 */
@@ -495,7 +545,7 @@ static void MX_TIM2_Init(void)
   htim2.Instance = TIM2;
   htim2.Init.Prescaler = 84-1;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 10-1;
+  htim2.Init.Period = 23-1;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim2) != HAL_OK)

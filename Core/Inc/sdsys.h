@@ -12,11 +12,11 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+
 void init_cardSD();
 void read_file(char *filePathName, char*fileData);
 unsigned int return_int_value_first_line(char *filePathName, FIL *file);
-void read_audio_file(char *filePathName, uint16_t *buffer);
-uint16_t string_to_int(char *string);
+void read_audio_file(char *filePathName, uint32_t *buffer);
 
 
 #endif /* INC_SDSYS_H_ */

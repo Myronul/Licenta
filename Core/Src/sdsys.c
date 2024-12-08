@@ -226,7 +226,7 @@ void read_audio_file(char *filePathName, uint16_t *buffer)
 */
 
 
-uint16_t string_to_int(char *string)
+static uint16_t string_to_int(char *string)
 {
 	unsigned int number = 0;
 
@@ -245,7 +245,7 @@ uint16_t string_to_int(char *string)
 
 
 
-void read_audio_file(char *filePathName, uint16_t *buffer)
+void read_audio_file(char *filePathName, uint32_t *buffer)
 {
 	/*
 	 * Functie pentru citirea fisierelor audio ce contin
@@ -260,7 +260,7 @@ void read_audio_file(char *filePathName, uint16_t *buffer)
 	 * se va marca printr-un flag static functiei
 	 *
 	 * Input: Calea catre fisier si pointerul aferent bufferului
-	 * 		  de 2048 de uint16_t
+	 * 		  de 1024 de uint16_t
 	 * Output: Void
 	 */
 
@@ -302,7 +302,7 @@ void read_audio_file(char *filePathName, uint16_t *buffer)
 		fileSize = f_size(&file); /*Aflam dimensiune in octeti a fisierului*/
 	}
 
-	const int n = 8192;
+	const int n = 5120; /*1024 *5 caractere de prelucrat*/
 	unsigned int nrFrames = fileSize / n;
 
 	if(fileSize%n != 0)
@@ -325,7 +325,7 @@ void read_audio_file(char *filePathName, uint16_t *buffer)
 		 * in numere zecimale de interes
 		 */
 
-		if(tempBuffer[i] != '\n' && index < 6)
+		if(tempBuffer[i] != '\n')
 		{
 			nrCharBuffer[index] = tempBuffer[i];
 			index++;
@@ -355,6 +355,7 @@ void read_audio_file(char *filePathName, uint16_t *buffer)
 	currentFrame++;
 
 	currentPosition = f_tell(&file);
+	currentPosition++;
 
 	f_close(&file);
 
