@@ -8,6 +8,9 @@
 #ifndef INC_AUDIO_H_
 #define INC_AUDIO_H_
 
+#include "main.h"
+#include "sdsys.h"
 
+void play_audio_file(char *path);
 
 #endif /* INC_AUDIO_H_ */

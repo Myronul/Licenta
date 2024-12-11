@@ -26,6 +26,7 @@
 #include "graphics.h"
 #include "lcd.h"
 #include "sdsys.h"
+#include "audio.h"
 #include <stdbool.h>
 
 /* USER CODE END Includes */
@@ -65,7 +66,6 @@ volatile uint8_t flagDmaSpiTx = 0; /*flaguri pentru transfer DMA prin SPI*/
 volatile uint8_t flagDmaSpiRx = 0;
 
 volatile bool flagDmaDAC = 0; /*Flag pentru DMA pe DAC si bufferele aferente*/
-uint32_t buffer[2048];
 
 /* USER CODE END PV */
 
@@ -124,49 +124,6 @@ static void MX_SDIO_SD_Init(void);
 
 
 
-  void redare_fisier_audio(char *path)
-  {
-
-	  read_audio_file(path, buffer); /*Citire in prima jumatate a bufferului -> 1024 de elemente*/
-
-	  HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, buffer, 2048, DAC_ALIGN_12B_R);
-
-	  while(1)
-	  {
-		  read_audio_file(path, buffer+1024);
-		  while(flagDmaDAC == 0);
-		  flagDmaDAC = 0;
-		  read_audio_file(path, buffer);
-		  while(flagDmaDAC == 0);
-		  flagDmaDAC = 0;
-
-	  }
-
-	  free(buffer);
-
-  }
-
-
-
-  float value = 0.2;
-  uint32_t var;
-  uint32_t sin_val[100];
-  #define pi 3.1415926
-
-  void get_sine()
-  {
-      for (int i = 0; i < 100; i++)
-      {
-
-          if (i < 50)
-              sin_val[i] = 4095;
-          else
-              sin_val[i] = 0;
-      }
-  }
-
-
-
 /* USER CODE END 0 */
 
 /**
@@ -211,9 +168,6 @@ int main(void)
   ILI9488_driver_init();  /*Initializare driver ecran LCD*/
   HAL_TIM_Base_Start(&htim2); /*Initializare timer2 pentru trigger DMA pe DAC*/
 
-  //get_sine();
-  //HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, sin_val, 100, DAC_ALIGN_12B_R);
-
 
   fill_screen1(0xF100);
   HAL_Delay(1000);
@@ -229,7 +183,7 @@ int main(void)
   unsigned int endTick = 0;
   unsigned int getTime = 0;
 
-  redare_fisier_audio("audio/melodie.txt");
+  play_audio_file("audio/mine.txt"); //doremi mine songita song22
 
   char *fileData = NULL;
   read_file("audio/text.txt", fileData);
@@ -543,9 +497,9 @@ static void MX_TIM2_Init(void)
 
   /* USER CODE END TIM2_Init 1 */
   htim2.Instance = TIM2;
-  htim2.Init.Prescaler = 84-1;
+  htim2.Init.Prescaler = 83;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 23-1;
+  htim2.Init.Period = 23;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim2) != HAL_OK)

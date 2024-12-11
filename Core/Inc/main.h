@@ -28,13 +28,14 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
-#include <stdbool.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <stdbool.h>
 
 extern SPI_HandleTypeDef hspi1;
 extern UART_HandleTypeDef huart1;
+extern DAC_HandleTypeDef hdac;
 volatile extern uint8_t flagDmaSpiTx;
 volatile extern uint8_t flagDmaSpiRx;
 volatile extern bool flagDmaDAC;
