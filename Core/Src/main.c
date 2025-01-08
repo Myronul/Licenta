@@ -173,10 +173,31 @@ int main(void)
   HAL_Delay(1000);
   fill_screen2(0xF00F);
   HAL_Delay(1000);
-  fill_screen2(0xFFFF);
-  HAL_Delay(1000);
   fill_screen2(0x3F51);
   HAL_Delay(1000);
+  fill_screen2(0xFFFF);
+  HAL_Delay(1000);
+
+  //Test translation
+
+  ENTITY entity;
+
+  entity.x0 = 0;
+  entity.y0 = 0;
+  entity.x1 = 32;
+  entity.y1 = 32;
+
+  draw_entity(entity,0xF100);
+  HAL_Delay(1000);
+  translation_entity(&entity, entity.x0+32, entity.y0, 0xF100);
+  HAL_Delay(1000);
+  translation_entity(&entity, entity.x0+32, entity.y0, 0xF100);
+  HAL_Delay(1000);
+  translation_entity(&entity, entity.x0+32, entity.y0, 0xF100);
+  HAL_Delay(1000);
+  translation_entity(&entity, entity.x0+32, entity.y0, 0xF100);
+  HAL_Delay(1000);
+
 
   //Test_SD_Card();
   unsigned int startTick = 0;

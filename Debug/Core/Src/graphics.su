@@ -7,3 +7,5 @@
 ../Core/Src/graphics.c:229:6:print_string	48	static
 ../Core/Src/graphics.c:255:6:draw_horizontal_line	40	static
 ../Core/Src/graphics.c:279:6:draw_vertical_line	40	static
+../Core/Src/graphics.c:303:6:draw_entity	48	static
+../Core/Src/graphics.c:330:6:translation_entity	40	static

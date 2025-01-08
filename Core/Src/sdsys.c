@@ -349,7 +349,11 @@ void read_audio_file(char *filePathName, uint32_t *buffer)
 
 	if(currentFrame == nrFrames)
 	{
-		flagNewAudioFile = 0;
+		/*Resetare flag pentru reinitializare*/
+
+		flagNewAudioFile = 1;
+		f_close(&file);
+		return;
 	}
 
 	currentFrame++;
