@@ -8,7 +8,7 @@
 #include "graphics.h"
 
 
-void convert_color_16_to_18(uint16_t color, uint8_t *pixel)
+void convert_color_16_to_18(uint16_t color, uint8_t *const pixel)
 {
 	/*
 	 * Functie de conversie a culorii de la 16 biti la 24 de biti
@@ -95,17 +95,11 @@ void fill_screen1(uint16_t color)
 	 * Input: Culoare pe 16 biti
 	 * Output: Void
 	 */
-	uint8_t r,g,b;
 
-	r = (color & 0xF800) >> 11;
-	g = (color & 0x07E0) >> 5;
-	b = color & 0x001F;
 
-	r = (255*r)/31;
-	g = (255*g)/63;
-	b = (255*b)/31;
+	uint8_t pixel[3];
+	convert_color_16_to_18(color, pixel);
 
-	uint8_t pixel[] = {r,g,b};
 	uint8_t *line = malloc(320*sizeof(pixel));
 
 	set_adress_window(0, 0, LCD_Width-1, LCD_Length-1, 'w');
@@ -300,6 +294,35 @@ void draw_vertical_line(uint16_t x0, uint16_t y0, uint16_t y1, uint16_t color)
 }
 
 
+void draw_rectangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color)
+{
+	/*
+	 * Functie pentru desenarea unui dreptunghi/patrat pe ecranul LCD
+	 * Input: (x0,y0) coordonatele initiale
+	 * 		  (x1,y1) offseturile fata de coordonatele initiale (numarul de pixeli)
+	 * Output: Void
+	 */
+
+
+	uint8_t pixel[3];
+	uint16_t pixelNr = x1*y1;
+	convert_color_16_to_18(color, pixel);
+
+	uint8_t *data = malloc(sizeof(pixel)*pixelNr);
+
+	for(uint16_t i=0; i<pixelNr; i++)
+	{
+		memcpy(data + i*sizeof(pixel), pixel, sizeof(pixel));
+	}
+
+	set_adress_window(x0, y0, x0+x1-1, y0+y1-1, 'w');
+	LCD_send_data_multi(data,pixelNr*sizeof(pixel));
+
+	free(data);
+
+}
+
+
 void draw_entity(ENTITY entity, uint16_t color)
 {
 	/*
@@ -315,24 +338,27 @@ void draw_entity(ENTITY entity, uint16_t color)
 	uint8_t pixel[3];
 	convert_color_16_to_18(color, pixel); /*Culoare de test*/
 
-	set_adress_window(entity.x0, entity.y0, entity.x1+entity.x0-1, entity.y1+entity.y0-1, 'w');
+	uint8_t *data = malloc(sizeof(pixel)*pixelNr);
 
-
-	for(uint16_t i=0; i<pixelNr;i++)
+	for(uint16_t i=0;i<pixelNr;i++ )
 	{
-		LCD_send_data_multi(pixel,sizeof(pixel));
+		memcpy(data + i*sizeof(pixel), pixel, sizeof(pixel));
 	}
 
+	set_adress_window(entity.x0, entity.y0, entity.x1+entity.x0-1, entity.y1+entity.y0-1, 'w');
+	LCD_send_data_multi(data,pixelNr*sizeof(pixel));
+
+	free(data);
 
 }
 
 
-void translation_entity(ENTITY *entity, int16_t x, int16_t y, uint16_t color)
+void translation_entity(ENTITY *const entity, int16_t x, int16_t y)
 {
 	/*
 	 * Functie pentru realizarea translatiei unei imagini (entitati)
 	 * Input: Un tip de data ENTITY alaturi de noile coordonate si culoarea temporara
-	 * a entiatii
+	 * a entiatii (de adaugat culoarea fundalului)
 	 * Output: Void
 	 *
 	 * Feature: De dat ca parametru numele unui fisier ce contine datele imaginii
@@ -343,6 +369,8 @@ void translation_entity(ENTITY *entity, int16_t x, int16_t y, uint16_t color)
 
 	if(x<0 || x>LCD_Width || y<0 || y> LCD_Length)
 	{
+		/*Pentru cazul depasirii limitelor ecranului*/
+
 		return;
 	}
 
@@ -352,9 +380,78 @@ void translation_entity(ENTITY *entity, int16_t x, int16_t y, uint16_t color)
 	entity->x0 = x;
 	entity->y0 = y;
 
-	draw_entity(*entity,color);
-	draw_entity(temp, 0xFFFF); /*Culoarea fundalului*/
 
+	if((x < (temp.x0+temp.x1)) && (x > (temp.x0)))
+	{
+		/*Pentru cazul unui Step cuprins in cadrul anterior*/
+
+		draw_entity(*entity, 0xF100);
+		draw_rectangle(temp.x0, temp.y0, x-temp.x0, temp.y1, 0xFFFF);
+
+	}
+
+	else  /*!!!! De modificat si de adaugat cazul pentru deplasare sus si pe y si stanga pe x*/
+
+		if((y < (temp.y0+temp.y1)) && (y > (temp.y0)))
+		{
+			draw_entity(*entity, 0xF100);
+			draw_rectangle(temp.x0, temp.y0, temp.x1, y-temp.y0, 0xFFFF);
+		}
+
+		else
+		{
+			draw_entity(*entity, 0xF100);
+			draw_entity(temp, 0xFFFF);
+		}
+
+
+}
+
+
+void translation_test(ENTITY *entity, uint16_t color, uint8_t step, uint16_t delay)
+{
+
+
+	while(1)
+	{
+		while((entity->x0 + entity->x1) < LCD_Width)
+		{
+			translation_entity(entity, entity->x0+step, entity->y0);//, color);
+			HAL_Delay(delay);
+		}
+
+		draw_entity(*entity, 0xFFFF);
+		entity->x0 = LCD_Width - entity->x1;
+
+		while((entity->y0 + entity->y1) < LCD_Length)
+		{
+
+			translation_entity(entity, entity->x0, entity->y0+step);//, color);
+			HAL_Delay(delay);
+		}
+
+		draw_entity(*entity, 0xFFFF);
+		entity->y0 = LCD_Length - entity->y1;
+
+		while((entity->x0 - step) > 0)
+		{
+			translation_entity(entity, entity->x0-step, entity->y0);//, color);
+			HAL_Delay(delay);
+		}
+
+		draw_entity(*entity, 0xFFFF);
+		entity->x0 = 0;
+
+		while((entity->y0 - step) > 0)
+		{
+			translation_entity(entity, entity->x0, entity->y0-step);//, color);
+			HAL_Delay(delay);
+		}
+
+		draw_entity(*entity, 0xFFFF);
+		entity->y0 = 0;
+
+	}
 }
 
 

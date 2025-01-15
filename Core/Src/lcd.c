@@ -33,7 +33,7 @@ void LCD_send_data_multi(uint8_t *data, unsigned int size)
 	 * Output: Void
 	 */
 
-	//flagDmaSpiTx = 1;
+	flagDmaSpiTx = 1;
 
 	unsigned int valMaxFrame = 1024; //numarul maxim de octeti pe frame
 	unsigned int nrFrames = size/valMaxFrame; //numarul de frameuri de trimis
@@ -45,34 +45,34 @@ void LCD_send_data_multi(uint8_t *data, unsigned int size)
 
 	if(size <= valMaxFrame)
 	{
-		//flagDmaSpiTx = 0;
-		//HAL_SPI_Transmit_DMA(&hspi1, data, size);
-		HAL_SPI_Transmit(&hspi1, data, size, HAL_MAX_DELAY);
+		flagDmaSpiTx = 0;
+		HAL_SPI_Transmit_DMA(&hspi1, data, size);
+		//HAL_SPI_Transmit(&hspi1, data, size, HAL_MAX_DELAY);
 	}
 
 	else
 	{
 		while(nrFrames != 0)
 		{
-			//while(flagDmaSpiTx == 0);
-			//flagDmaSpiTx = 0;
-			//HAL_SPI_Transmit_DMA(&hspi1, data, valMaxFrame);
-			HAL_SPI_Transmit(&hspi1, data, valMaxFrame, HAL_MAX_DELAY);
+			while(flagDmaSpiTx == 0);
+			flagDmaSpiTx = 0;
+			HAL_SPI_Transmit_DMA(&hspi1, data, valMaxFrame);
+			//HAL_SPI_Transmit(&hspi1, data, valMaxFrame, HAL_MAX_DELAY);
 			data = data+valMaxFrame;
 			nrFrames--;
 		}
 
 		if(remainder != 0)
 		{
-			//while(flagDmaSpiTx == 0);
-			//flagDmaSpiTx = 0;
-			//HAL_SPI_Transmit_DMA(&hspi1, data, remainder);
-			HAL_SPI_Transmit(&hspi1, data, remainder, HAL_MAX_DELAY);
+			while(flagDmaSpiTx == 0);
+			flagDmaSpiTx = 0;
+			HAL_SPI_Transmit_DMA(&hspi1, data, remainder);
+			//HAL_SPI_Transmit(&hspi1, data, remainder, HAL_MAX_DELAY);
 
 		}
 	}
 
-	//while(flagDmaSpiTx == 0);
+	while(flagDmaSpiTx == 0);
 	CS_D();
 
 }
@@ -118,7 +118,7 @@ void ILI9488_driver_init()
 
 	LCD_send_command(0x01); //Reset SW de driver
 	HAL_Delay(150);
-	LCD_send_command(ILI9488_SLPOUT); //scoatem sistemul din sleep
+	LCD_send_command(0x11); //scoatem sistemul din sleep
 	HAL_Delay(255);
 
 	LCD_send_command(0xE0); //Comanda pentru a seta controlul la nivel de GAMMA pozitiv
@@ -209,11 +209,11 @@ void ILI9488_driver_init()
 	LCD_send_data(0x82);
 
 
-	LCD_send_command(ILI9488_SLPOUT);
+	LCD_send_command(0x11);
 	HAL_Delay(255);
 	LCD_send_command(0x51); //Luminozittea Display
 	LCD_send_data(0xFF);    //maxima
-	LCD_send_command(ILI9488_DISPON);
+	LCD_send_command(0x29); //Display on
 
 
 }

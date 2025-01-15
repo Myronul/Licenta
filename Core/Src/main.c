@@ -188,15 +188,19 @@ int main(void)
   entity.y1 = 32;
 
   draw_entity(entity,0xF100);
-  HAL_Delay(1000);
-  translation_entity(&entity, entity.x0+32, entity.y0, 0xF100);
-  HAL_Delay(1000);
-  translation_entity(&entity, entity.x0+32, entity.y0, 0xF100);
-  HAL_Delay(1000);
-  translation_entity(&entity, entity.x0+32, entity.y0, 0xF100);
-  HAL_Delay(1000);
-  translation_entity(&entity, entity.x0+32, entity.y0, 0xF100);
-  HAL_Delay(1000);
+  HAL_Delay(500);
+
+  translation_test(&entity, 0xF100, 2, 30);
+
+  HAL_Delay(500);
+  translation_entity(&entity, entity.x0+32, entity.y0);//, 0xF100);
+  HAL_Delay(500);
+  translation_entity(&entity, entity.x0+32, entity.y0);//, 0xF100);
+  HAL_Delay(500);
+  translation_entity(&entity, entity.x0+12, entity.y0);//, 0xF100);
+  HAL_Delay(500);
+  translation_entity(&entity, entity.x0+12, entity.y0);//, 0xF100);
+  HAL_Delay(500);
 
 
   //Test_SD_Card();

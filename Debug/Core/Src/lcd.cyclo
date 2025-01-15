@@ -1,5 +1,5 @@
 ../Core/Src/lcd.c:4:6:LCD_send_command	1
-../Core/Src/lcd.c:25:6:LCD_send_data_multi	4
+../Core/Src/lcd.c:25:6:LCD_send_data_multi	7
 ../Core/Src/lcd.c:81:6:LCD_send_data	1
 ../Core/Src/lcd.c:100:6:ILI9488_driver_init	1
 ../Core/Src/lcd.c:224:6:set_adress_window	3
