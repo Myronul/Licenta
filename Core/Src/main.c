@@ -184,20 +184,20 @@ int main(void)
 
   entity.x0 = 0;
   entity.y0 = 0;
-  entity.x1 = 32;
-  entity.y1 = 32;
+  entity.x1 = 64;
+  entity.y1 = 64;
 
   draw_entity(entity,0xF100);
   HAL_Delay(500);
 
-  translation_test(&entity, 0xF100, 2, 30);
+  translation_test(&entity, 0xF100, 1, 0);
 
   HAL_Delay(500);
-  translation_entity(&entity, entity.x0+32, entity.y0);//, 0xF100);
+  translation_entity(&entity, entity.x0+100, entity.y0+100);//, 0xF100);
+  HAL_Delay(2000);
+  translation_entity(&entity, entity.x0+32, entity.y0+32);//, 0xF100);
   HAL_Delay(500);
-  translation_entity(&entity, entity.x0+32, entity.y0);//, 0xF100);
-  HAL_Delay(500);
-  translation_entity(&entity, entity.x0+12, entity.y0);//, 0xF100);
+  translation_entity(&entity, entity.x0+12, entity.y0+32);//, 0xF100);
   HAL_Delay(500);
   translation_entity(&entity, entity.x0+12, entity.y0);//, 0xF100);
   HAL_Delay(500);

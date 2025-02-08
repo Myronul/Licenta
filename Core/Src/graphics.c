@@ -381,25 +381,50 @@ void translation_entity(ENTITY *const entity, int16_t x, int16_t y)
 	entity->y0 = y;
 
 
-	if((x < (temp.x0+temp.x1)) && (x > (temp.x0)))
+	if(temp.y0 == y)
 	{
-		/*Pentru cazul unui Step cuprins in cadrul anterior*/
+		/*Pentru cazul unui Step cuprins in cadrul anterior pe axa x*/
 
-		draw_entity(*entity, 0xF100);
-		draw_rectangle(temp.x0, temp.y0, x-temp.x0, temp.y1, 0xFFFF);
+		if((x < (temp.x0+temp.x1)) && (x > (temp.x0)))
+		{
+			/*Pentru cazul deplasarii pe +x*/
+			draw_entity(*entity, 0xF100);
+			draw_rectangle(temp.x0, temp.y0, x-temp.x0, temp.y1, 0xFFFF); /*Culoare background*/
+		}
+
+		if((x+temp.x1 < (temp.x0+temp.x1)) && (x+temp.x1 > temp.x0))
+		{
+			/*Pentru cazul deplasarii pe -x*/
+			draw_entity(*entity, 0xF100);
+			draw_rectangle(temp.x0+temp.x1-(temp.x0-x), temp.y0, temp.x0-x, temp.y1, 0xFFFF); /*Culoare background*/
+		}
 
 	}
 
 	else  /*!!!! De modificat si de adaugat cazul pentru deplasare sus si pe y si stanga pe x*/
 
-		if((y < (temp.y0+temp.y1)) && (y > (temp.y0)))
+		if(temp.x0==x)
 		{
-			draw_entity(*entity, 0xF100);
-			draw_rectangle(temp.x0, temp.y0, temp.x1, y-temp.y0, 0xFFFF);
+			if((y < (temp.y0+temp.y1)) && (y > (temp.y0)))
+			{
+				/*Pentru cazul deplasarii pe +y*/
+				draw_entity(*entity, 0xF100);
+				draw_rectangle(temp.x0, temp.y0, temp.x1, y-temp.y0, 0xFFFF);
+			}
+
+			if((y+temp.y1 < (temp.y0+temp.y1)) && (y+temp.y1 > temp.y0))
+			{
+				/*Pentru cazul deplasarii pe -y*/
+				draw_entity(*entity, 0xF100);
+				draw_rectangle(temp.x0, temp.y0+temp.y1-(temp.y0-y), temp.x1, temp.y0-y, 0xFFFF);
+			}
+
 		}
 
 		else
 		{
+			/*Pentru orice alt caz (deplasare pe diagonala sau aleatoriu)*/
+
 			draw_entity(*entity, 0xF100);
 			draw_entity(temp, 0xFFFF);
 		}

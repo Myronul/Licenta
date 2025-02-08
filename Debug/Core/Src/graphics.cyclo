@@ -9,5 +9,5 @@
 ../Core/Src/graphics.c:273:6:draw_vertical_line	2
 ../Core/Src/graphics.c:297:6:draw_rectangle	2
 ../Core/Src/graphics.c:326:6:draw_entity	2
-../Core/Src/graphics.c:356:6:translation_entity	9
-../Core/Src/graphics.c:411:6:translation_test	5
+../Core/Src/graphics.c:356:6:translation_entity	15
+../Core/Src/graphics.c:436:6:translation_test	5

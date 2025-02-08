@@ -10,4 +10,4 @@
 ../Core/Src/graphics.c:297:6:draw_rectangle	48	static
 ../Core/Src/graphics.c:326:6:draw_entity	56	static
 ../Core/Src/graphics.c:356:6:translation_entity	48	static
-../Core/Src/graphics.c:411:6:translation_test	32	static
+../Core/Src/graphics.c:436:6:translation_test	32	static
