@@ -5,11 +5,13 @@
  *      Author: Miron Andrei
  */
 
-#include "lcd.h"
-#include "font.h"
 
 #ifndef INC_GRAPHICS_H_
 #define INC_GRAPHICS_H_
+
+#include "lcd.h"
+#include "font.h"
+
 
 typedef struct ENTITY
 {

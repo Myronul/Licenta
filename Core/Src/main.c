@@ -178,16 +178,29 @@ int main(void)
   fill_screen2(0x3F51);
   HAL_Delay(1000);
 
-  //Test image read
+  //Test read from LCD
+
+  draw_pixel(0,0,0x001F);
+  draw_pixel(1,0,0xF800);
+  draw_pixel(0,1,0x001F);
+  draw_pixel(1,1,0xFF00);
+
+  uint8_t *dataRec1;
+  dataRec1 = malloc(sizeof(char)*20);
+  read_pixel_frame(0,0,2,2,dataRec1);
+
+  free(dataRec1);
+
+  //Test image print from SD card
   ENTITY ent;
   ent.x0 = 0;
   ent.y0 = 0;
-  ent.data = malloc(sizeof(char)*1000);
-  read_image_file("graphic/img1.txt", ent.data, &(ent.x1), &(ent.y1));
+
+  read_image_file("graphic/img4.txt", &ent);
   set_adress_window(ent.x0, ent.y0, ent.x1+ent.x0-1, ent.y1+ent.y0-1, 'w');
   LCD_send_data_multi(ent.data,sizeof(char)*(ent.x1*ent.y1)*3);
 
-  HAL_Delay(5000);
+  HAL_Delay(4000);
 
   free(ent.data);
 
@@ -200,7 +213,7 @@ int main(void)
   entity.x1 = 64;
   entity.y1 = 64;
 
-  draw_entity(entity,0xF100);
+  //draw_entity(&entity,NULL);
   HAL_Delay(500);
 
   translation_test(&entity, 0xF100, 1, 0);

@@ -6,6 +6,7 @@
  */
 
 #include "graphics.h"
+#include "sdsys.h"
 
 
 void convert_color_16_to_18(uint16_t color, uint8_t *const pixel)
@@ -333,12 +334,17 @@ void draw_entity(ENTITY entity, uint16_t color)
 	 * de afisat si nu culoarea, parametrul color e doar de test
 	 */
 
+	uint8_t *data;
+
+
+	/*Avem imagine monocolor sub 32x32 -> imagine nu se afla pe cardul SD!*/
+
 	uint16_t pixelNr = entity.x1*entity.y1;
 
 	uint8_t pixel[3];
-	convert_color_16_to_18(color, pixel); /*Culoare de test*/
+	convert_color_16_to_18(color, pixel);
 
-	uint8_t *data = malloc(sizeof(pixel)*pixelNr);
+	data = malloc(sizeof(pixel)*pixelNr);
 
 	for(uint16_t i=0;i<pixelNr;i++ )
 	{
@@ -349,6 +355,8 @@ void draw_entity(ENTITY entity, uint16_t color)
 	LCD_send_data_multi(data,pixelNr*sizeof(pixel));
 
 	free(data);
+
+
 
 }
 
@@ -478,6 +486,8 @@ void translation_test(ENTITY *entity, uint16_t color, uint8_t step, uint16_t del
 
 	}
 }
+
+
 
 
 

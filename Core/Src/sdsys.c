@@ -303,7 +303,7 @@ void read_audio_file(char *filePathName, uint32_t *buffer)
 }
 
 
-void read_image_file(char *filePathName, uint8_t *data, int16_t *x, int16_t *y)
+void read_image_file(char *filePathName, ENTITY *entity)
 {
 	/*
 	 * Functie pentru citirea in format binar a unui fisier.txt
@@ -360,8 +360,10 @@ void read_image_file(char *filePathName, uint8_t *data, int16_t *x, int16_t *y)
 
 		/*conversie ascii to zecimal*/
 
-		*x = stringHexa_to_int(headerBuffer); /*latimea*/
-		*y = stringHexa_to_int(headerBuffer+4); /*lungimea*/
+		entity->x1 = stringHexa_to_int(headerBuffer); /*latimea*/
+		entity->y1 = stringHexa_to_int(headerBuffer+4); /*lungimea*/
+
+		entity->data = malloc(3*sizeof(char)*(entity->x1)*(entity->y1));
 
 		flagNewImageFile = 0;
 		currentFrame = 0;
@@ -386,6 +388,7 @@ void read_image_file(char *filePathName, uint8_t *data, int16_t *x, int16_t *y)
 		nrFrames++;
 	}
 
+	uint16_t index = 0;
 	char tempBuffer[n];
 	char nrCharBuffer[3];
 
@@ -403,8 +406,8 @@ void read_image_file(char *filePathName, uint8_t *data, int16_t *x, int16_t *y)
 			/*Functie pentru transformare din ascii hexa in zecimal*/
 
 			nrCharBuffer[2] = '\n';
-			*data = stringHexa_to_int(nrCharBuffer);
-			data++;
+			entity->data[index] = stringHexa_to_int(nrCharBuffer);
+			index++;
 		}
 
 

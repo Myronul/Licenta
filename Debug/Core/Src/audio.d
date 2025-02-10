@@ -38,7 +38,8 @@ Core/Src/audio.o: ../Core/Src/audio.c ../Core/Inc/audio.h \
  ../Core/Inc/main.h ../FATFS/Target/bsp_driver_sd.h \
  ../Middlewares/Third_Party/FatFs/src/ff_gen_drv.h \
  ../Middlewares/Third_Party/FatFs/src/diskio.h \
- ../Middlewares/Third_Party/FatFs/src/ff.h ../FATFS/Target/sd_diskio.h
+ ../Middlewares/Third_Party/FatFs/src/ff.h ../FATFS/Target/sd_diskio.h \
+ ../Core/Inc/graphics.h ../Core/Inc/lcd.h ../Core/Inc/font.h
 ../Core/Inc/audio.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
@@ -85,3 +86,6 @@ Core/Src/audio.o: ../Core/Src/audio.c ../Core/Inc/audio.h \
 ../Middlewares/Third_Party/FatFs/src/diskio.h:
 ../Middlewares/Third_Party/FatFs/src/ff.h:
 ../FATFS/Target/sd_diskio.h:
+../Core/Inc/graphics.h:
+../Core/Inc/lcd.h:
+../Core/Inc/font.h:

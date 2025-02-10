@@ -9,6 +9,7 @@
 #define INC_SDSYS_H_
 
 #include "fatfs.h"
+#include "graphics.h"
 #include <stdlib.h>
 #include <stdbool.h>
 
@@ -17,7 +18,7 @@ void init_cardSD();
 void read_file(char *filePathName, char*fileData);
 unsigned int return_int_value_first_line(char *filePathName, FIL *file);
 void read_audio_file(char *filePathName, uint32_t *buffer);
-void read_image_file(char *filePathName, uint8_t *data, int16_t *x, int16_t *y);
+void read_image_file(char *filePathName, ENTITY *entity);
 
 
 #endif /* INC_SDSYS_H_ */
