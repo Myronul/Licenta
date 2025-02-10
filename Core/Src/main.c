@@ -175,8 +175,21 @@ int main(void)
   HAL_Delay(1000);
   fill_screen2(0x3F51);
   HAL_Delay(1000);
-  fill_screen2(0xFFFF);
+  fill_screen2(0x3F51);
   HAL_Delay(1000);
+
+  //Test image read
+  ENTITY ent;
+  ent.x0 = 0;
+  ent.y0 = 0;
+  ent.data = malloc(sizeof(char)*1000);
+  read_image_file("graphic/img1.txt", ent.data, &(ent.x1), &(ent.y1));
+  set_adress_window(ent.x0, ent.y0, ent.x1+ent.x0-1, ent.y1+ent.y0-1, 'w');
+  LCD_send_data_multi(ent.data,sizeof(char)*(ent.x1*ent.y1)*3);
+
+  HAL_Delay(5000);
+
+  free(ent.data);
 
   //Test translation
 

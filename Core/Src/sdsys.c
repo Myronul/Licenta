@@ -15,7 +15,9 @@ void init_cardSD()
 {
 	/*
 	 * Functie pentru initializarea cardului SD. Se va monta
-	 * sistemul de fisiere prin variabila fs declarata static
+	 * sistemul de fisiere prin variabila fs declarata static.
+	 * Functia se va apela doar o singura data la initializarea
+	 * intregului sistem.
 	 */
 
 	f_mount(&fs, "", 1);
@@ -102,129 +104,6 @@ unsigned int return_int_value_first_line(char *filePathName, FIL *file)
 }
 
 
-/*
-
-void read_audio_file(char *filePathName, uint16_t *buffer)
-{
-	/*
-	 * Functie pentru citirea fisierelor audio ce contin
-	 * esantioanele .wav ale unei melodii cu rezolutia de
-	 * 12 biti si frecventa de esantionare de 44.1Khz
-	 * Functia este dezvoltat cu scopul de a o folosit
-	 * pentru tehnica double-buffering, alaturi de DMA pe DAC.
-	 * Se va apela de n ori functia, tinand de seama pointerul
-	 * de referinta in fisierul cu esantioanele din carduL SD.
-	 * Cand dupa cele n apeluri alternante prin double-buffering
-	 * au incetat, si s-au citit toate esantioanele din fisier,
-	 * se va marca printr-un flag static functiei
-	 *
-	 * Input: Calea catre fisier si pointerul aferent bufferului
-	 * 		  de 2048 de uint16_t
-	 * Output: Void
-
-
-
-	FRESULT res;
-	FIL file;
-	//UINT byteRead;
-
-	res = f_open(&file, filePathName, FA_READ);
-
-	if(res != FR_OK)
-	{
-		return;
-	}
-
-
-	/*
-	 * citim prima valoarea din fisier care indica
-	 * numarul total de linii din acesta
-
-
-	static bool flagNewAudioFile = 1;
-
-	static uint16_t currentFrame = 0;
-	static FSIZE_t currentPosition = 0;
-	static unsigned int nrLines = 0;
-
-
-	f_lseek(&file, currentPosition); /*Revenim la pozitia anterioara citirii
-
-
-	if(flagNewAudioFile == 1)
-	{
-		/*
-		 * Reactualizare valorilor statice pentru deschiderea unui nou
-		 * fisier audio
-
-
-		flagNewAudioFile = 0;
-		currentFrame = 0;
-
-		currentPosition = 0;
-		f_lseek(&file, currentPosition); /*Mutam cursorul la inceputul fisierului
-
-		nrLines = return_int_value_first_line(filePathName, &file);
-	}
-
-
-	uint16_t n = 2048;
-	int nrFrames = nrLines / n;
-	uint8_t reminder = nrLines % n;
-
-	char tempBuffer[10];
-
-	if(currentFrame == nrFrames)
-	{
-		if(reminder != 0)
-		{
-			while(reminder)
-			{
-				f_gets(tempBuffer,sizeof(tempBuffer),&file);
-
-				(*buffer) = (uint16_t)atoi(tempBuffer);
-				buffer++;
-
-				reminder--;
-
-			}
-		}
-
-
-		flagNewAudioFile = 1;
-
-	}
-
-	while(n!=0)
-	{
-		/*
-		 * Ne vom popula bufferul cu valorile esantioanelor
-		 * audio ale melodiei alese.
-
-
-		f_gets(tempBuffer,sizeof(tempBuffer),&file);
-
-		(*buffer) = (uint16_t)atoi(tempBuffer);
-		buffer++;
-
-		n--;
-
-	}
-
-	currentFrame++;
-
-	currentPosition = f_tell(&file);
-	f_lseek (&file, currentPosition);
-
-
-	f_close(&file);
-
-
-}
-
-
-*/
-
 
 static uint16_t string_to_int(char *string)
 {
@@ -241,6 +120,63 @@ static uint16_t string_to_int(char *string)
 	}
 
 	return number;
+}
+
+
+static uint8_t stringHexa_to_int(char *string)
+{
+	unsigned int number = 0;
+	uint8_t temp = 0;
+
+	while((*string) != '\n')
+	{
+
+		if(((*string) >= '0') && ((*string)<='9'))
+		{
+			number = number * 16 + ((*string) - '0');
+		}
+
+		else
+			if((*string) >= 'A' && ((*string)<='F') )
+			{
+				switch((*string))
+				{
+					case 'A':
+						temp = 10;
+						break;
+					case 'B':
+						temp = 11;
+						break;
+					case 'C':
+						temp = 12;
+						break;
+					case 'D':
+						temp = 13;
+						break;
+					case 'E':
+						temp = 14;
+						break;
+					case 'F':
+						temp = 15;
+						break;
+					default:
+						temp = 0;
+				}
+
+				number = number * 16 + temp;
+
+			}
+
+			else
+			{
+				return 1;
+			}
+
+		string++;
+	}
+
+	return number;
+
 }
 
 
@@ -366,6 +302,133 @@ void read_audio_file(char *filePathName, uint32_t *buffer)
 
 }
 
+
+void read_image_file(char *filePathName, uint8_t *data, int16_t *x, int16_t *y)
+{
+	/*
+	 * Functie pentru citirea in format binar a unui fisier.txt
+	 * ce contine informatiile unei imagini.
+	 * prima valoarea reprezinta latimea imaginii  -> offset x
+	 * a doua valoarea reprezinta lungimea imagine -> offset y
+	 * urmatoarele valori din fisier sunt datele brute (raw) ale
+	 * imaginii.
+	 * Se va considera ca fiecare pixel e format din 24 de biti (3 bytes)
+	 * Se va folosi formatul pe 18 biti, extins pe 24
+	 * ex: 0xFFFF 1100 0000 -> culoarea alb
+	 * Se vor citi latimea si lungimea din fisier, urmand ca pentru fiecare
+	 * cadru sa se citeasca 32x32 pixeli -> 32*32*3=3072 octeti
+	 * Daca imaginea e mai mare decat 6144 octeti, se va transfera in frame-uri
+	 * x si y vor fi valorile de referinta ale entitatii ce apeleaza functia
+	 */
+
+
+	FRESULT res;
+	FIL file;
+	UINT byteRead;
+
+	res = f_open(&file, filePathName, FA_READ);
+
+	if(res != FR_OK)
+	{
+		return;
+	}
+
+	static bool flagNewImageFile = 1;
+
+	static DWORD fileSize;
+	static uint16_t currentFrame = 0;
+	static FSIZE_t currentPosition = 0;
+
+	f_lseek(&file, currentPosition); /*Revenim la pozitia anterioara citirii*/
+
+
+	if(flagNewImageFile == 1)
+		{
+
+		/*
+		 * Reactualizare valorilor statice pentru deschiderea unui nou
+		 * fisier imagine
+		 * Vom afla de asemenea si dimensiune fisierului
+		*/
+
+		/*Vom citi initial headerul care contine latimea si lungimea imaginii. Primele 8 caractere*/
+
+		char headerBuffer[8];
+
+		f_read(&file, headerBuffer, (sizeof(headerBuffer))-1, &byteRead);
+		headerBuffer[byteRead] = '\n';
+
+		/*conversie ascii to zecimal*/
+
+		*x = stringHexa_to_int(headerBuffer); /*latimea*/
+		*y = stringHexa_to_int(headerBuffer+4); /*lungimea*/
+
+		flagNewImageFile = 0;
+		currentFrame = 0;
+
+		currentPosition = ++byteRead;
+		f_lseek(&file, currentPosition); /*Mutam cursorul dupa header*/
+
+		/*Aflam dimensiune in octeti a imaginii de citit (scadem dimensiunea headerului)*/
+		fileSize = f_size(&file) - 8;
+
+		}
+
+
+	const int n = 6144; /* 6*32*32 -> 6144 de octeti de prelucrat din fisier per frame*/
+	/*care vor deveni 3072 deocteti in *data -> date reale*/
+
+	unsigned int nrFrames = fileSize / n;
+
+
+	if(fileSize%n != 0 && nrFrames!=0)
+	{
+		nrFrames++;
+	}
+
+	char tempBuffer[n];
+	char nrCharBuffer[3];
+
+	f_read(&file, tempBuffer, (sizeof(char)*n), &byteRead);
+
+	for(uint16_t i=0; i<byteRead; i++)
+	{
+		/*Vom parcurge bufferul la intervale de 2 valori HEXA, preluand caracterele ascii
+		 * pe care le vom transforma in zecimal ex: FF1200FE3000...*/
+
+		nrCharBuffer[i%2] = tempBuffer[i];
+
+		if(i%2 != 0)
+		{
+			/*Functie pentru transformare din ascii hexa in zecimal*/
+
+			nrCharBuffer[2] = '\n';
+			*data = stringHexa_to_int(nrCharBuffer);
+			data++;
+		}
+
+
+	}
+
+
+	if(currentFrame >= nrFrames)
+	{
+		/*Resetare flag pentru reinitializare*/
+
+		flagNewImageFile = 1;
+		f_close(&file);
+		return;
+	}
+
+	currentFrame++;
+
+	currentPosition = f_tell(&file);
+	currentPosition++;
+
+	f_close(&file);
+
+
+}
 
 
 

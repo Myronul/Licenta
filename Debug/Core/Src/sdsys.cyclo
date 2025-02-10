@@ -1,5 +1,7 @@
 ../Core/Src/sdsys.c:14:6:init_cardSD	1
-../Core/Src/sdsys.c:27:6:read_file	2
-../Core/Src/sdsys.c:61:14:return_int_value_first_line	3
-../Core/Src/sdsys.c:229:17:string_to_int	4
-../Core/Src/sdsys.c:248:6:read_audio_file	7
+../Core/Src/sdsys.c:29:6:read_file	2
+../Core/Src/sdsys.c:63:14:return_int_value_first_line	3
+../Core/Src/sdsys.c:108:17:string_to_int	4
+../Core/Src/sdsys.c:126:16:stringHexa_to_int	12
+../Core/Src/sdsys.c:184:6:read_audio_file	7
+../Core/Src/sdsys.c:306:6:read_image_file	8

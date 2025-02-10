@@ -353,7 +353,7 @@ void draw_entity(ENTITY entity, uint16_t color)
 }
 
 
-void translation_entity(ENTITY *const entity, int16_t x, int16_t y)
+void translation_entity(ENTITY *const restrict entity, int16_t x, int16_t y)
 {
 	/*
 	 * Functie pentru realizarea translatiei unei imagini (entitati)
@@ -401,7 +401,7 @@ void translation_entity(ENTITY *const entity, int16_t x, int16_t y)
 
 	}
 
-	else  /*!!!! De modificat si de adaugat cazul pentru deplasare sus si pe y si stanga pe x*/
+	else
 
 		if(temp.x0==x)
 		{
