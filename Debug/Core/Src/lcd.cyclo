@@ -4,4 +4,4 @@
 ../Core/Src/lcd.c:100:6:ILI9488_driver_init	1
 ../Core/Src/lcd.c:224:6:set_adress_window	3
 ../Core/Src/lcd.c:265:6:read_pixel_frame	2
-../Core/Src/lcd.c:334:6:read_pixel_format	1
+../Core/Src/lcd.c:336:6:read_pixel_format	1

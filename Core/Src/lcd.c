@@ -318,6 +318,8 @@ void read_pixel_frame(uint16_t x0, uint16_t y0, uint16_t x, uint16_t y, uint8_t*
     while(flagDmaSpiRx == 0);
     CS_D();
 
+    free(data);
+
     //HAL_UART_Transmit(&huart1, dummy, 1, HAL_MAX_DELAY);
     //HAL_UART_Transmit(&huart1, data, byteNr, HAL_MAX_DELAY);
 

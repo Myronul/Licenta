@@ -23,7 +23,7 @@ typedef struct ENTITY
 	 * ori ca existenta in format raw din cardul SD
 	 */
 
-	uint8_t id;
+	uint8_t id; /*Daca MSB este 0 imaginea este stocata pe cardul SD */
 
 	int16_t x0;
 	int16_t y0;
@@ -39,7 +39,7 @@ typedef struct ENTITY
 		 * se afla in cardul SD
 		 */
 
-		uint8_t color; /*culoare pentru formele prime*/
+		uint16_t color; /*culoare pentru formele prime, pe 16 biti*/
 		uint8_t *data; /*buffer de date pentru imagini card SD*/
 
 	};
@@ -60,9 +60,9 @@ void print_string(uint16_t x, uint16_t y, char* string, uint8_t n, uint16_t font
 void draw_horizontal_line(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t color);
 void draw_vertical_line(uint16_t x0, uint16_t y0, uint16_t y1, uint16_t color);
 void draw_rectangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color);
-void draw_entity(ENTITY entity, uint16_t color);
+void draw_entity(ENTITY *entity, char *filePathName);
 void translation_entity(ENTITY *const restrict entity, int16_t x, int16_t y);//, uint16_t color);
-void translation_test(ENTITY *entity, uint16_t color, uint8_t step, uint16_t delay);
+void translation_test(ENTITY *entity, uint8_t step, uint16_t delay);
 
 
 #endif /* INC_GRAPHICS_H_ */

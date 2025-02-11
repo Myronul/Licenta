@@ -324,7 +324,7 @@ void draw_rectangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t
 }
 
 
-void draw_entity(ENTITY entity, uint16_t color)
+void draw_entity(ENTITY *entity, char *filePathName)
 {
 	/*
 	 * Functie care va desena entitatea sub forma ei prima, anume
@@ -335,30 +335,84 @@ void draw_entity(ENTITY entity, uint16_t color)
 	 */
 
 	uint8_t *data;
+	bool flagImgDone = 0;
 
-
-	/*Avem imagine monocolor sub 32x32 -> imagine nu se afla pe cardul SD!*/
-
-	uint16_t pixelNr = entity.x1*entity.y1;
-
-	uint8_t pixel[3];
-	convert_color_16_to_18(color, pixel);
-
-	data = malloc(sizeof(pixel)*pixelNr);
-
-	for(uint16_t i=0;i<pixelNr;i++ )
+	if((entity->id != 0) || (filePathName==NULL))
 	{
-		memcpy(data + i*sizeof(pixel), pixel, sizeof(pixel));
+		/*Avem imagine monocolor sub 32x32 -> imagine nu se afla pe cardul SD!*/
+
+		uint16_t pixelNr = (entity->x1)*(entity->y1);
+
+		uint8_t pixel[3];
+		convert_color_16_to_18(entity->color, pixel);
+
+		data = malloc(sizeof(pixel)*pixelNr);
+
+		for(uint16_t i=0;i<pixelNr;i++ )
+		{
+			memcpy(data + i*sizeof(pixel), pixel, sizeof(pixel));
+		}
+
+		set_adress_window(entity->x0, entity->y0, (entity->x1)+(entity->x0)-1, (entity->y1)+(entity->y0)-1, 'w');
+		LCD_send_data_multi(data,pixelNr*sizeof(pixel));
+
+		free(data);
 	}
 
-	set_adress_window(entity.x0, entity.y0, entity.x1+entity.x0-1, entity.y1+entity.y0-1, 'w');
-	LCD_send_data_multi(data,pixelNr*sizeof(pixel));
 
-	free(data);
+	else
+	{
+		/*Imagine stocata in bufferul *data din cardul SD*/
 
+		uint16_t byteNr = 0; /*index*/
+
+		read_image_file(filePathName, entity, &byteNr, &flagImgDone);
+
+		set_adress_window(entity->x0, entity->y0, (entity->x1)+(entity->x0)-1, (entity->y1)+(entity->y0)-1, 'w');
+
+		if(byteNr < 3072)
+		{
+			/*
+			 * Pentru cazul unui singur frame de transmis
+			 */
+
+			LCD_send_data_multi(entity->data, byteNr);
+			free(entity->data);
+			return;
+		}
+
+		else
+		{
+			/*
+			 * Pentru cazul mai multor frameuri
+			 */
+
+
+			LCD_send_data_multi(entity->data, byteNr);
+
+			do
+			{
+				if(flagImgDone == 1)
+				{
+					break;
+				}
+
+				read_image_file(filePathName, entity, &byteNr, &flagImgDone);
+				LCD_send_data_multi(entity->data, byteNr);
+
+			}while(byteNr >= 3072);
+
+		}
+
+
+		free(entity->data);
+
+
+	}
 
 
 }
+
 
 
 void translation_entity(ENTITY *const restrict entity, int16_t x, int16_t y)
@@ -396,14 +450,14 @@ void translation_entity(ENTITY *const restrict entity, int16_t x, int16_t y)
 		if((x < (temp.x0+temp.x1)) && (x > (temp.x0)))
 		{
 			/*Pentru cazul deplasarii pe +x*/
-			draw_entity(*entity, 0xF100);
+			draw_entity(entity, NULL);
 			draw_rectangle(temp.x0, temp.y0, x-temp.x0, temp.y1, 0xFFFF); /*Culoare background*/
 		}
 
 		if((x+temp.x1 < (temp.x0+temp.x1)) && (x+temp.x1 > temp.x0))
 		{
 			/*Pentru cazul deplasarii pe -x*/
-			draw_entity(*entity, 0xF100);
+			draw_entity(entity, NULL);
 			draw_rectangle(temp.x0+temp.x1-(temp.x0-x), temp.y0, temp.x0-x, temp.y1, 0xFFFF); /*Culoare background*/
 		}
 
@@ -416,14 +470,14 @@ void translation_entity(ENTITY *const restrict entity, int16_t x, int16_t y)
 			if((y < (temp.y0+temp.y1)) && (y > (temp.y0)))
 			{
 				/*Pentru cazul deplasarii pe +y*/
-				draw_entity(*entity, 0xF100);
+				draw_entity(entity, NULL);
 				draw_rectangle(temp.x0, temp.y0, temp.x1, y-temp.y0, 0xFFFF);
 			}
 
 			if((y+temp.y1 < (temp.y0+temp.y1)) && (y+temp.y1 > temp.y0))
 			{
 				/*Pentru cazul deplasarii pe -y*/
-				draw_entity(*entity, 0xF100);
+				draw_entity(entity, NULL);
 				draw_rectangle(temp.x0, temp.y0+temp.y1-(temp.y0-y), temp.x1, temp.y0-y, 0xFFFF);
 			}
 
@@ -433,15 +487,15 @@ void translation_entity(ENTITY *const restrict entity, int16_t x, int16_t y)
 		{
 			/*Pentru orice alt caz (deplasare pe diagonala sau aleatoriu)*/
 
-			draw_entity(*entity, 0xF100);
-			draw_entity(temp, 0xFFFF);
+			draw_entity(entity, NULL);
+			draw_entity(&temp, NULL);
 		}
 
 
 }
 
 
-void translation_test(ENTITY *entity, uint16_t color, uint8_t step, uint16_t delay)
+void translation_test(ENTITY *entity, uint8_t step, uint16_t delay)
 {
 
 
@@ -453,7 +507,7 @@ void translation_test(ENTITY *entity, uint16_t color, uint8_t step, uint16_t del
 			HAL_Delay(delay);
 		}
 
-		draw_entity(*entity, 0xFFFF);
+		draw_entity(entity, NULL);
 		entity->x0 = LCD_Width - entity->x1;
 
 		while((entity->y0 + entity->y1) < LCD_Length)
@@ -463,7 +517,7 @@ void translation_test(ENTITY *entity, uint16_t color, uint8_t step, uint16_t del
 			HAL_Delay(delay);
 		}
 
-		draw_entity(*entity, 0xFFFF);
+		draw_entity(entity, NULL);
 		entity->y0 = LCD_Length - entity->y1;
 
 		while((entity->x0 - step) > 0)
@@ -472,7 +526,7 @@ void translation_test(ENTITY *entity, uint16_t color, uint8_t step, uint16_t del
 			HAL_Delay(delay);
 		}
 
-		draw_entity(*entity, 0xFFFF);
+		draw_entity(entity, NULL);
 		entity->x0 = 0;
 
 		while((entity->y0 - step) > 0)
@@ -481,7 +535,7 @@ void translation_test(ENTITY *entity, uint16_t color, uint8_t step, uint16_t del
 			HAL_Delay(delay);
 		}
 
-		draw_entity(*entity, 0xFFFF);
+		draw_entity(entity, NULL);
 		entity->y0 = 0;
 
 	}

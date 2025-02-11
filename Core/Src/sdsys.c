@@ -303,7 +303,7 @@ void read_audio_file(char *filePathName, uint32_t *buffer)
 }
 
 
-void read_image_file(char *filePathName, ENTITY *entity)
+void read_image_file(char *filePathName, ENTITY *entity, uint16_t *index, bool *flagImgDone)
 {
 	/*
 	 * Functie pentru citirea in format binar a unui fisier.txt
@@ -355,6 +355,10 @@ void read_image_file(char *filePathName, ENTITY *entity)
 
 		char headerBuffer[8];
 
+		currentPosition = 0;
+		f_lseek(&file, currentPosition);
+
+
 		f_read(&file, headerBuffer, (sizeof(headerBuffer))-1, &byteRead);
 		headerBuffer[byteRead] = '\n';
 
@@ -382,13 +386,17 @@ void read_image_file(char *filePathName, ENTITY *entity)
 
 	unsigned int nrFrames = fileSize / n;
 
+	if(n == fileSize)
+	{
+		nrFrames--; /*pastram logica primului frame pana la n*/
+	}
 
 	if(fileSize%n != 0 && nrFrames!=0)
 	{
 		nrFrames++;
 	}
 
-	uint16_t index = 0;
+	*index = 0;
 	char tempBuffer[n];
 	char nrCharBuffer[3];
 
@@ -406,17 +414,20 @@ void read_image_file(char *filePathName, ENTITY *entity)
 			/*Functie pentru transformare din ascii hexa in zecimal*/
 
 			nrCharBuffer[2] = '\n';
-			entity->data[index] = stringHexa_to_int(nrCharBuffer);
-			index++;
+			entity->data[(*index)] = stringHexa_to_int(nrCharBuffer);
+			(*index)++;
 		}
 
 
 	}
 
 
-	if(currentFrame >= nrFrames)
+
+	if((currentFrame >= nrFrames) || (byteRead < 3072))
 	{
 		/*Resetare flag pentru reinitializare*/
+
+		*flagImgDone = 1;
 
 		flagNewImageFile = 1;
 		f_close(&file);
