@@ -415,7 +415,7 @@ void draw_entity(ENTITY *entity, char *filePathName)
 
 
 
-void translation_entity(ENTITY *const restrict entity, int16_t x, int16_t y)
+void translation_entity(ENTITY *const restrict entity, int16_t x, int16_t y, bool TurnOnStep)
 {
 	/*
 	 * Functie pentru realizarea translatiei unei imagini (entitati)
@@ -443,7 +443,7 @@ void translation_entity(ENTITY *const restrict entity, int16_t x, int16_t y)
 	entity->y0 = y;
 
 
-	if(temp.y0 == y)
+	if((temp.y0 == y) && (TurnOnStep==1))
 	{
 		/*Pentru cazul unui Step cuprins in cadrul anterior pe axa x*/
 
@@ -465,7 +465,7 @@ void translation_entity(ENTITY *const restrict entity, int16_t x, int16_t y)
 
 	else
 
-		if(temp.x0==x)
+		if((temp.x0==x) && (TurnOnStep==1))
 		{
 			if((y < (temp.y0+temp.y1)) && (y > (temp.y0)))
 			{
@@ -503,7 +503,7 @@ void translation_test(ENTITY *entity, uint8_t step, uint16_t delay)
 	{
 		while((entity->x0 + entity->x1) < LCD_Width)
 		{
-			translation_entity(entity, entity->x0+step, entity->y0);//, color);
+			translation_entity(entity, entity->x0+step, entity->y0, 1);//, color);
 			HAL_Delay(delay);
 		}
 
@@ -513,7 +513,7 @@ void translation_test(ENTITY *entity, uint8_t step, uint16_t delay)
 		while((entity->y0 + entity->y1) < LCD_Length)
 		{
 
-			translation_entity(entity, entity->x0, entity->y0+step);//, color);
+			translation_entity(entity, entity->x0, entity->y0+step, 1);//, color);
 			HAL_Delay(delay);
 		}
 
@@ -522,20 +522,23 @@ void translation_test(ENTITY *entity, uint8_t step, uint16_t delay)
 
 		while((entity->x0 - step) > 0)
 		{
-			translation_entity(entity, entity->x0-step, entity->y0);//, color);
+			translation_entity(entity, entity->x0-step, entity->y0, 1);//, color);
 			HAL_Delay(delay);
 		}
 
+		entity->color = 0xFFFF;
 		draw_entity(entity, NULL);
+		entity->color = 0xF100;
 		entity->x0 = 0;
 
 		while((entity->y0 - step) > 0)
 		{
-			translation_entity(entity, entity->x0, entity->y0-step);//, color);
+			translation_entity(entity, entity->x0, entity->y0-step, 1);//, color);
 			HAL_Delay(delay);
 		}
-
+		entity->color = 0xFFFF;
 		draw_entity(entity, NULL);
+		entity->color = 0xF100;
 		entity->y0 = 0;
 
 	}

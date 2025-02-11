@@ -123,7 +123,7 @@ static uint16_t string_to_int(char *string)
 }
 
 
-static uint8_t stringHexa_to_int(char *string)
+static int16_t stringHexa_to_int(char *string)
 {
 	unsigned int number = 0;
 	uint8_t temp = 0;
@@ -367,7 +367,18 @@ void read_image_file(char *filePathName, ENTITY *entity, uint16_t *index, bool *
 		entity->x1 = stringHexa_to_int(headerBuffer); /*latimea*/
 		entity->y1 = stringHexa_to_int(headerBuffer+4); /*lungimea*/
 
-		entity->data = malloc(3*sizeof(char)*(entity->x1)*(entity->y1));
+		if((entity->x1)*(entity->y1) < 1024)
+		{
+			/*Pentru un singur frame alocam exact cat trebuie */
+			entity->data = malloc(3*sizeof(char)*(entity->x1)*(entity->y1));
+
+		}
+
+		else
+		{
+			/*Alocam maxim 3072 de octeti per frame*/
+			entity->data = malloc(sizeof(char)*3072);
+		}
 
 		flagNewImageFile = 0;
 		currentFrame = 0;
@@ -422,8 +433,9 @@ void read_image_file(char *filePathName, ENTITY *entity, uint16_t *index, bool *
 	}
 
 
+	currentFrame++;
 
-	if((currentFrame >= nrFrames) || (byteRead < 3072))
+	if((currentFrame >= nrFrames) || ((*(index)) < 3072))
 	{
 		/*Resetare flag pentru reinitializare*/
 
@@ -434,10 +446,9 @@ void read_image_file(char *filePathName, ENTITY *entity, uint16_t *index, bool *
 		return;
 	}
 
-	currentFrame++;
 
 	currentPosition = f_tell(&file);
-	currentPosition++;
+
 
 	f_close(&file);
 

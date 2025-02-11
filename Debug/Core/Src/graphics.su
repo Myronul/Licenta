@@ -9,5 +9,5 @@
 ../Core/Src/graphics.c:274:6:draw_vertical_line	40	static
 ../Core/Src/graphics.c:298:6:draw_rectangle	48	static
 ../Core/Src/graphics.c:327:6:draw_entity	48	static
-../Core/Src/graphics.c:418:6:translation_entity	48	static
+../Core/Src/graphics.c:418:6:translation_entity	56	static
 ../Core/Src/graphics.c:498:6:translation_test	16	static

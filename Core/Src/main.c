@@ -198,12 +198,16 @@ int main(void)
   HAL_Delay(1000);
   ent.x0 = 0;
   ent.y0 = 0;
-  draw_entity(&ent, "graphic/img3.txt");
+  draw_entity(&ent, "graphic/img10.txt");
   HAL_Delay(1000);
   ent.x0 = 0;
   ent.y0 = 0;
-  draw_entity(&ent, "graphic/img2.txt");
-  HAL_Delay(1000);
+  //draw_entity(&ent, "graphic/img51.txt");
+  //HAL_Delay(2000);
+  draw_entity(&ent, "graphic/img6.txt");
+  HAL_Delay(2000);
+  draw_entity(&ent, "graphic/img8.txt");
+  HAL_Delay(2000);
   //draw_entity(&ent, "graphic/img4.txt");
   //HAL_Delay(1000);
 
@@ -231,13 +235,13 @@ int main(void)
   translation_test(&entity, 1, 0);
 
   HAL_Delay(500);
-  translation_entity(&entity, entity.x0+100, entity.y0+100);//, 0xF100);
+  translation_entity(&entity, entity.x0+100, entity.y0+100, 1);//, 0xF100);
   HAL_Delay(2000);
-  translation_entity(&entity, entity.x0+32, entity.y0+32);//, 0xF100);
+  translation_entity(&entity, entity.x0+32, entity.y0+32, 1);//, 0xF100);
   HAL_Delay(500);
-  translation_entity(&entity, entity.x0+12, entity.y0+32);//, 0xF100);
+  translation_entity(&entity, entity.x0+12, entity.y0+32, 1);//, 0xF100);
   HAL_Delay(500);
-  translation_entity(&entity, entity.x0+12, entity.y0);//, 0xF100);
+  translation_entity(&entity, entity.x0+12, entity.y0, 1);//, 0xF100);
   HAL_Delay(500);
 
 
