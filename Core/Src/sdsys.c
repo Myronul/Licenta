@@ -303,7 +303,7 @@ void read_audio_file(char *filePathName, uint32_t *buffer)
 }
 
 
-void read_image_file(char *filePathName, ENTITY *entity, uint16_t *index, bool *flagImgDone)
+void read_image_file(char *filePathName, ENTITY *entity, uint16_t *indexFlag, bool *flagImgDone)
 {
 	/*
 	 * Functie pentru citirea in format binar a unui fisier.txt
@@ -339,11 +339,13 @@ void read_image_file(char *filePathName, ENTITY *entity, uint16_t *index, bool *
 	static uint16_t currentFrame = 0;
 	static FSIZE_t currentPosition = 0;
 
-	f_lseek(&file, currentPosition); /*Revenim la pozitia anterioara citirii*/
+	static const int n = 3072;
+	static unsigned int nrFrames = 0;
+
 
 
 	if(flagNewImageFile == 1)
-		{
+	{
 
 		/*
 		 * Reactualizare valorilor statice pentru deschiderea unui nou
@@ -351,21 +353,23 @@ void read_image_file(char *filePathName, ENTITY *entity, uint16_t *index, bool *
 		 * Vom afla de asemenea si dimensiune fisierului
 		*/
 
-		/*Vom citi initial headerul care contine latimea si lungimea imaginii. Primele 8 caractere*/
+		/*Vom citi initial headerul care contine latimea si lungimea imaginii. Primii 4 octeti ai fisierului*/
 
-		char headerBuffer[8];
+		uint8_t headerBuffer[4];
 
 		currentPosition = 0;
 		f_lseek(&file, currentPosition);
 
 
-		f_read(&file, headerBuffer, (sizeof(headerBuffer))-1, &byteRead);
-		headerBuffer[byteRead] = '\n';
+		f_read(&file, headerBuffer, 4, &byteRead);
 
-		/*conversie ascii to zecimal*/
+		/*prelucrarea bufferului 4 octeti Little Endian*/
+		entity->x1 = 0;
+		entity->y1 = 0;
 
-		entity->x1 = stringHexa_to_int(headerBuffer); /*latimea*/
-		entity->y1 = stringHexa_to_int(headerBuffer+4); /*lungimea*/
+		entity->x1 = ((entity->x1 | headerBuffer[1]) << 8) | (entity->x1 | headerBuffer[0]); /*Latimea*/
+		entity->y1 = ((entity->y1 | headerBuffer[3]) << 8) | (entity->y1 | headerBuffer[2]); /*Lungimea*/
+
 
 		if((entity->x1)*(entity->y1) < 1024)
 		{
@@ -383,21 +387,27 @@ void read_image_file(char *filePathName, ENTITY *entity, uint16_t *index, bool *
 		flagNewImageFile = 0;
 		currentFrame = 0;
 
-		currentPosition = ++byteRead;
+		currentPosition = byteRead;
 		f_lseek(&file, currentPosition); /*Mutam cursorul dupa header*/
 
 		/*Aflam dimensiune in octeti a imaginii de citit (scadem dimensiunea headerului)*/
-		fileSize = f_size(&file) - 8;
+		fileSize = f_size(&file) - 4;
 
-		}
+		/*calculam numarul de frameuri*/
+
+		nrFrames = fileSize / n;
+
+	}
 
 
-	const int n = 6144; /* 6*32*32 -> 6144 de octeti de prelucrat din fisier per frame*/
-	/*care vor deveni 3072 deocteti in *data -> date reale*/
+	else
+	{
+		f_lseek(&file, currentPosition); /*Revenim la pozitia anterioara citirii*/
+	}
 
-	unsigned int nrFrames = fileSize / n;
 
-	if(n == fileSize)
+
+	if(fileSize == n)
 	{
 		nrFrames--; /*pastram logica primului frame pana la n*/
 	}
@@ -407,35 +417,25 @@ void read_image_file(char *filePathName, ENTITY *entity, uint16_t *index, bool *
 		nrFrames++;
 	}
 
-	*index = 0;
+	*indexFlag = 0;
 	char tempBuffer[n];
-	char nrCharBuffer[3];
 
 	f_read(&file, tempBuffer, (sizeof(char)*n), &byteRead);
+	(*indexFlag) = byteRead;
 
 	for(uint16_t i=0; i<byteRead; i++)
 	{
 		/*Vom parcurge bufferul la intervale de 2 valori HEXA, preluand caracterele ascii
 		 * pe care le vom transforma in zecimal ex: FF1200FE3000...*/
 
-		nrCharBuffer[i%2] = tempBuffer[i];
-
-		if(i%2 != 0)
-		{
-			/*Functie pentru transformare din ascii hexa in zecimal*/
-
-			nrCharBuffer[2] = '\n';
-			entity->data[(*index)] = stringHexa_to_int(nrCharBuffer);
-			(*index)++;
-		}
-
+		entity->data[i] = tempBuffer[i];
 
 	}
 
 
 	currentFrame++;
 
-	if((currentFrame >= nrFrames) || ((*(index)) < 3072))
+	if((currentFrame >= nrFrames) || ((*(indexFlag)) < 3072))
 	{
 		/*Resetare flag pentru reinitializare*/
 

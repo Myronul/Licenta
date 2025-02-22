@@ -4,4 +4,4 @@
 ../Core/Src/sdsys.c:108:17:string_to_int	4
 ../Core/Src/sdsys.c:126:16:stringHexa_to_int	12
 ../Core/Src/sdsys.c:184:6:read_audio_file	7
-../Core/Src/sdsys.c:306:6:read_image_file	11
+../Core/Src/sdsys.c:306:6:read_image_file	10
