@@ -176,6 +176,10 @@ int main(void)
   fill_screen2(0x3F51);
   HAL_Delay(1000);
 
+  unsigned int startTick = 0;
+  unsigned int endTick = 0;
+  unsigned int getTime = 0;
+
   //Test read from LCD
 
   //draw_pixel(0,0,0x001F);
@@ -198,7 +202,10 @@ int main(void)
   HAL_Delay(1000);
   ent.x0 = 0;
   ent.y0 = 0;
+  startTick = HAL_GetTick();
   draw_entity(&ent, "graphic/img10.txt");
+  endTick = HAL_GetTick();
+  getTime = endTick - startTick;
   HAL_Delay(1000);
   ent.x0 = 0;
   ent.y0 = 0;
@@ -246,9 +253,6 @@ int main(void)
 
 
   //Test_SD_Card();
-  unsigned int startTick = 0;
-  unsigned int endTick = 0;
-  unsigned int getTime = 0;
 
   play_audio_file("audio/mine.txt"); //doremi mine songita song22
 

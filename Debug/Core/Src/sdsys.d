@@ -38,8 +38,7 @@ Core/Src/sdsys.o: ../Core/Src/sdsys.c ../Core/Inc/sdsys.h \
  ../Middlewares/Third_Party/FatFs/src/ff_gen_drv.h \
  ../Middlewares/Third_Party/FatFs/src/diskio.h \
  ../Middlewares/Third_Party/FatFs/src/ff.h ../FATFS/Target/sd_diskio.h \
- ../Core/Inc/graphics.h ../Core/Inc/lcd.h ../Core/Inc/main.h \
- ../Core/Inc/font.h
+ ../Core/Inc/graphics.h ../Core/Inc/lcd.h ../Core/Inc/font.h
 ../Core/Inc/sdsys.h:
 ../FATFS/App/fatfs.h:
 ../Middlewares/Third_Party/FatFs/src/ff.h:
@@ -86,5 +85,4 @@ Core/Src/sdsys.o: ../Core/Src/sdsys.c ../Core/Inc/sdsys.h \
 ../FATFS/Target/sd_diskio.h:
 ../Core/Inc/graphics.h:
 ../Core/Inc/lcd.h:
-../Core/Inc/main.h:
 ../Core/Inc/font.h:

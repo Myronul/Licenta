@@ -1,7 +1,7 @@
-../Core/Src/lcd.c:4:6:LCD_send_command	1
-../Core/Src/lcd.c:25:6:LCD_send_data_multi	7
-../Core/Src/lcd.c:81:6:LCD_send_data	1
-../Core/Src/lcd.c:100:6:ILI9488_driver_init	1
-../Core/Src/lcd.c:224:6:set_adress_window	3
-../Core/Src/lcd.c:265:6:read_pixel_frame	2
-../Core/Src/lcd.c:336:6:read_pixel_format	1
+../Core/Src/lcd.c:17:6:LCD_send_command	1
+../Core/Src/lcd.c:38:6:LCD_send_data_multi	7
+../Core/Src/lcd.c:94:6:LCD_send_data	1
+../Core/Src/lcd.c:113:6:ILI9488_driver_init	1
+../Core/Src/lcd.c:237:6:set_adress_window	3
+../Core/Src/lcd.c:278:6:read_pixel_frame	2
+../Core/Src/lcd.c:349:6:read_pixel_format	1

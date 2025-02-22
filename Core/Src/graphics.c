@@ -5,9 +5,14 @@
  *      Author: Miron Andrei
  */
 
+#include "stm32f4xx_hal.h"
+
 #include "graphics.h"
 #include "sdsys.h"
 
+
+extern SPI_HandleTypeDef hspi1;
+volatile extern uint8_t flagDmaSpiTx;
 
 void convert_color_16_to_18(uint16_t color, uint8_t *const pixel)
 {
@@ -370,6 +375,9 @@ void draw_entity(ENTITY *entity, char *filePathName)
 
 		set_adress_window(entity->x0, entity->y0, (entity->x1)+(entity->x0)-1, (entity->y1)+(entity->y0)-1, 'w');
 
+		DC_DATA();
+		CS_A();
+
 		if(byteNr < 3072)
 		{
 			/*
@@ -386,9 +394,10 @@ void draw_entity(ENTITY *entity, char *filePathName)
 			/*
 			 * Pentru cazul mai multor frameuri
 			 */
+			flagDmaSpiTx = 0;
 
-
-			LCD_send_data_multi(entity->data, byteNr);
+			//LCD_send_data_multi(entity->data, byteNr);
+			HAL_SPI_Transmit_DMA(&hspi1, entity->data, byteNr);
 
 			do
 			{
@@ -398,15 +407,18 @@ void draw_entity(ENTITY *entity, char *filePathName)
 				}
 
 				read_image_file(filePathName, entity, &byteNr, &flagImgDone);
-				LCD_send_data_multi(entity->data, byteNr);
+
+				while(flagDmaSpiTx == 0);
+				flagDmaSpiTx = 0;
+				HAL_SPI_Transmit_DMA(&hspi1, entity->data, byteNr);
 
 			}while(byteNr >= 3072);
 
 		}
 
-
+		while(flagDmaSpiTx == 0);
 		free(entity->data);
-
+		CS_D();
 
 	}
 

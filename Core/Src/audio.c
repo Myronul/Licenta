@@ -7,6 +7,9 @@
 
 #include"audio.h"
 
+volatile extern bool flagDmaDAC;
+extern DAC_HandleTypeDef hdac;
+
 static uint32_t *buffer; /*Buffer pentru redare audio folosit static in fisier*/
 
 

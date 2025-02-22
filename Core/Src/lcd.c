@@ -1,4 +1,17 @@
+/*
+ * lcd.c
+ *
+ *  Created on: Oct 20, 2024
+ *      Author: Miron Andrei
+ */
+
 #include "lcd.h"
+#include "stm32f4xx_hal.h"
+
+extern SPI_HandleTypeDef hspi1;
+volatile extern uint8_t flagDmaSpiTx;
+volatile extern uint8_t flagDmaSpiRx;
+extern UART_HandleTypeDef huart1;
 
 
 void LCD_send_command(uint8_t cmd)
@@ -35,7 +48,7 @@ void LCD_send_data_multi(uint8_t *data, unsigned int size)
 
 	flagDmaSpiTx = 1;
 
-	unsigned int valMaxFrame = 1024; //numarul maxim de octeti pe frame
+	unsigned int valMaxFrame = 65535; //numarul maxim de octeti pe frame
 	unsigned int nrFrames = size/valMaxFrame; //numarul de frameuri de trimis
 	unsigned int remainder = size%valMaxFrame; //restul de trimis daca e cazul
 
