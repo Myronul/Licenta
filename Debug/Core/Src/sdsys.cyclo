@@ -5,3 +5,5 @@
 ../Core/Src/sdsys.c:126:16:stringHexa_to_int	12
 ../Core/Src/sdsys.c:184:6:read_audio_file	7
 ../Core/Src/sdsys.c:306:6:read_image_file	10
+../Core/Src/sdsys.c:460:17:frame_number_x	3
+../Core/Src/sdsys.c:477:6:read_image__file_scaling	7

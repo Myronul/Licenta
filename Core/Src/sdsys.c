@@ -457,7 +457,160 @@ void read_image_file(char *filePathName, ENTITY *entity, uint16_t *indexFlag, bo
 
 
 
+static uint16_t frame_number_x(ENTITY *entity, uint8_t factor)
+{
 
+	uint8_t x = 1;
+
+	while((((entity->y1)*factor*factor*x) <= (32*32)) && (x < entity->y1))
+	{
+		x++;
+	}
+
+
+	return (x-1);
+
+}
+
+
+
+void read_image__file_scaling(char *filePathName, ENTITY *entity, const uint8_t factor, uint16_t *px)
+{
+	/*
+	 * Functie pentru citirea in cadre a matricei M1.
+	 * Functia va adauga cadrele in pointerul entitatii date ca
+	 * parametru. In cazul depasirii pragului de 32x32 pixeli asociati in M1->M2
+	 * se va citi in cadre calculate pe linii.
+	 * Se va calcula x (nr de linii de preluat din M1) astfel incat sa genereze in M2
+	 * o prelucrare <= decat 32x32 pixeli.
+	 * Matricea prelucrata va fi intotdeauna patratica (m,n) m==n
+	 * La final vom obtine in entity->data datele aferente pixelelilor urmatoarelor
+	 * x linii, fiecare linie avand entity->y1 linii
+	 *
+	 */
+
+	FRESULT res;
+	FIL file;
+	UINT byteRead;
+
+	res = f_open(&file, filePathName, FA_READ);
+
+	if(res != FR_OK)
+	{
+		return;
+	}
+
+
+	static bool flagNewImageFile = 1;
+	static bool flagOneFrame = 0;
+
+	static uint16_t currentFrame = 0;
+	static FSIZE_t currentPosition = 0;
+
+	static uint16_t x = 0; /*Numarul de linii din M1 ai sa avem sub 32x32 pixeli de prelucrat in M2*/
+	static unsigned int nrFrames = 0;
+
+	if(flagNewImageFile == 1)
+	{
+
+		/*
+		 * Reactualizare valorilor statice pentru deschiderea unui nou
+		 * fisier imagine
+		 * Vom afla de asemenea si dimensiune fisierului
+		*/
+
+		/*Vom citi initial headerul care contine latimea si lungimea imaginii. Primii 4 octeti ai fisierului*/
+
+		uint8_t headerBuffer[4];
+
+		currentPosition = 0;
+		f_lseek(&file, currentPosition);
+
+
+		f_read(&file, headerBuffer, 4, &byteRead);
+
+		/*prelucrarea bufferului 4 octeti Little Endian*/
+		entity->x1 = 0;
+		entity->y1 = 0;
+
+		entity->x1 = ((entity->x1 | headerBuffer[1]) << 8) | (entity->x1 | headerBuffer[0]); /*Latimea*/
+		entity->y1 = ((entity->y1 | headerBuffer[3]) << 8) | (entity->y1 | headerBuffer[2]); /*Lungimea*/
+
+
+		flagNewImageFile = 0;
+		currentFrame = 0;
+		flagOneFrame = 0;
+
+		currentPosition = byteRead;
+		f_lseek(&file, currentPosition); /*Mutam cursorul dupa header*/
+
+
+		x = frame_number_x(entity, factor); /*numarul de linii cuprins in fiecare frame al matricei M1*/
+		*px = x;
+
+		if(x <= entity->y1)
+		{
+			flagOneFrame = 1;
+			nrFrames = 1; /*Avem o imagine care scalata are mai putini de 32x32 pixeli*/
+			entity->data = malloc(3*sizeof(char)*(entity->x1)*(entity->y1));
+
+		}
+
+		else
+		{
+			entity->data = malloc(3*sizeof(char)*(entity->y1)*x);
+
+			nrFrames = (entity->y1) / x;
+
+			if((entity->y1) % x != 0)
+			{
+				nrFrames++;
+			}
+		}
+
+	}
+
+
+	else
+	{
+		f_lseek(&file, currentPosition); /*Revenim la pozitia anterioara citirii*/
+	}
+
+
+	/*Vom pune in entity->data primele valori*/
+
+	if(flagOneFrame == 1)
+	{
+		f_read(&file, entity->data, (3*sizeof(char)*(entity->x1)*(entity->y1)), &byteRead);
+
+		flagNewImageFile = 1;
+		f_close(&file);
+		return;
+
+	}
+
+	else
+	{
+		f_read(&file, entity->data, (3*sizeof(char)*(entity->y1)*x), &byteRead);
+
+		currentFrame++;
+
+		if(currentFrame >= nrFrames)
+		{
+			flagNewImageFile = 1;
+			f_close(&file);
+			return;
+		}
+
+
+		currentPosition = f_tell(&file);
+		f_close(&file);
+
+	}
+
+
+
+}
 
 
 

@@ -204,10 +204,15 @@ int main(void)
   HAL_Delay(2000);
   draw_entity(&ent, "graphic/img8.bin");
   HAL_Delay(2000);
-  startTick = HAL_GetTick();
   draw_entity(&ent, "graphic/img9.bin");
+  HAL_Delay(2000);
+  startTick = HAL_GetTick();
+  draw_entity(&ent, "graphic/img92.bin");
   endTick = HAL_GetTick();
   getTime = endTick - startTick;
+
+  fill_screen2(0x0000);
+  draw_entity(&ent, "graphic/pixel1.bin");
   HAL_Delay(3000);
   //draw_entity(&ent, "graphic/img51.txt");
   //HAL_Delay(2000);
