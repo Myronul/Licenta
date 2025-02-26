@@ -169,16 +169,34 @@ int main(void)
   HAL_TIM_Base_Start(&htim2); /*Initializare timer2 pentru trigger DMA pe DAC*/
 
 
+
   fill_screen1(0xF100);
   HAL_Delay(1000);
   fill_screen2(0xF00F);
   HAL_Delay(1000);
-  fill_screen2(0x3F51);
+  fill_screen2(0xFFFF);
   HAL_Delay(1000);
 
   unsigned int startTick = 0;
   unsigned int endTick = 0;
   unsigned int getTime = 0;
+
+  ENTITY entity;
+
+
+  /*Test SCALARE*/
+
+  fill_screen2(0xFFFF);
+
+  entity.x0 = 128;
+  entity.y0 = 128;
+  entity.id = 0;
+  draw_entity(&entity, "graphic/pixel.bin");
+  HAL_Delay(1000);
+
+  scaling_entity(&entity, 41, "graphic/pixel.bin");
+  draw_entity(&entity, entity.filePathName);
+  HAL_Delay(1000);
 
   //Test read from LCD
 
@@ -231,9 +249,10 @@ int main(void)
 
   //free(ent.data);
 
+
   //Test translation
 
-  ENTITY entity;
+  //ENTITY entity;
 
   entity.x0 = 0;
   entity.y0 = 0;
@@ -242,9 +261,8 @@ int main(void)
   entity.color = 0xF100;
 
   //draw_entity(&entity,NULL);
-  HAL_Delay(500);
 
-  translation_test(&entity, 1, 0);
+  //translation_test(&entity, 1, 0);
 
   HAL_Delay(500);
   translation_entity(&entity, entity.x0+100, entity.y0+100, 1);//, 0xF100);

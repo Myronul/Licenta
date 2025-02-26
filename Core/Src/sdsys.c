@@ -462,19 +462,34 @@ static uint16_t frame_number_x(ENTITY *entity, uint8_t factor)
 
 	uint8_t x = 1;
 
-	while((((entity->y1)*factor*factor*x) <= (32*32)) && (x < entity->y1))
+	while((((entity->x1)*factor*factor*x) <= (32*32)))
 	{
+		if(x == entity->y1)
+		{
+			return x;
+		}
+
 		x++;
 	}
 
 
-	return (x-1);
+	if(x==1)
+	{
+		return 1;
+	}
+
+	else
+	{
+		return (x-1);
+	}
+
+
 
 }
 
 
 
-void read_image__file_scaling(char *filePathName, ENTITY *entity, const uint8_t factor, uint16_t *px)
+void read_image_file_scaling(char *filePathName, ENTITY *entity, const uint8_t factor, uint16_t *px, bool *flagTerm)
 {
 	/*
 	 * Functie pentru citirea in cadre a matricei M1.
@@ -548,7 +563,7 @@ void read_image__file_scaling(char *filePathName, ENTITY *entity, const uint8_t 
 		x = frame_number_x(entity, factor); /*numarul de linii cuprins in fiecare frame al matricei M1*/
 		*px = x;
 
-		if(x <= entity->y1)
+		if(x == entity->y1)
 		{
 			flagOneFrame = 1;
 			nrFrames = 1; /*Avem o imagine care scalata are mai putini de 32x32 pixeli*/
@@ -558,7 +573,7 @@ void read_image__file_scaling(char *filePathName, ENTITY *entity, const uint8_t 
 
 		else
 		{
-			entity->data = malloc(3*sizeof(char)*(entity->y1)*x);
+			entity->data = malloc(3*sizeof(char)*(entity->x1)*x);
 
 			nrFrames = (entity->y1) / x;
 
@@ -583,6 +598,7 @@ void read_image__file_scaling(char *filePathName, ENTITY *entity, const uint8_t 
 	{
 		f_read(&file, entity->data, (3*sizeof(char)*(entity->x1)*(entity->y1)), &byteRead);
 
+		*flagTerm = 1;
 		flagNewImageFile = 1;
 		f_close(&file);
 		return;
@@ -591,16 +607,19 @@ void read_image__file_scaling(char *filePathName, ENTITY *entity, const uint8_t 
 
 	else
 	{
-		f_read(&file, entity->data, (3*sizeof(char)*(entity->y1)*x), &byteRead);
+		f_read(&file, entity->data, (3*sizeof(char)*(entity->x1)*x), &byteRead);
 
 		currentFrame++;
 
-		if(currentFrame >= nrFrames)
+		if((currentFrame >= nrFrames))
 		{
+			*px = (entity->y1) - x*(nrFrames-1); /*recalculam ultimul numar de linii de citit*/
+			*flagTerm = 1;
 			flagNewImageFile = 1;
 			f_close(&file);
 			return;
 		}
+
 
 
 		currentPosition = f_tell(&file);
@@ -614,7 +633,81 @@ void read_image__file_scaling(char *filePathName, ENTITY *entity, const uint8_t 
 
 
 
+void write_image_file(char *filePathName, uint8_t *data, size_t nrBytesData, int16_t x1, int16_t y1, bool flagTerm)
+{
+	/*
+	 * Functie pentru scrierea in fisierul dat la intrare
+	 * a datelor aferente imaginii
+	 */
 
+
+	FRESULT res;
+	FIL file;
+	UINT byteWr;
+
+
+	static bool flagStart = 0;
+	static FSIZE_t currentPosition = 0;
+
+	if(flagStart == 0)
+	{
+
+		res = f_open(&file, filePathName, FA_WRITE | FA_CREATE_ALWAYS);
+
+
+		if (res != FR_OK)
+		{
+		    return;
+		}
+
+
+		currentPosition = 0;
+		uint8_t header[4];
+
+		/*
+		 * Scriem mai intai headerul anume
+		 * dimensiunea imaginii asociate
+		 */
+
+		header[0] = (int8_t)(x1);
+		header[1] = (int8_t)(x1>>8);
+		header[2] = (int8_t)(y1);
+		header[3] = (int8_t)(y1>>8);
+
+		f_write(&file, header, 4, &byteWr);
+
+		flagStart = 1;
+
+	}
+
+
+	else
+	{
+		res = f_open(&file, filePathName, FA_WRITE | FA_OPEN_ALWAYS);
+
+		if (res != FR_OK)
+		{
+		    return;
+		}
+
+		f_lseek(&file, currentPosition);
+
+	}
+
+
+	if(flagTerm == 1)
+	{
+		flagStart = 0;
+
+	}
+
+
+	f_write(&file, data, nrBytesData, &byteWr);
+	currentPosition = f_tell(&file);
+
+	f_close(&file);
+
+}
 
 
 

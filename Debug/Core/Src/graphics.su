@@ -11,3 +11,4 @@
 ../Core/Src/graphics.c:332:6:draw_entity	48	static
 ../Core/Src/graphics.c:430:6:translation_entity	56	static
 ../Core/Src/graphics.c:510:6:translation_test	16	static
+../Core/Src/graphics.c:560:6:scaling_entity	72	static

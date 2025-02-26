@@ -13,6 +13,14 @@
 #include "font.h"
 
 
+typedef struct INFO
+{
+	uint8_t *data;
+	char *filePathName;
+
+}INFO;
+
+
 typedef struct ENTITY
 {
 	/*
@@ -39,8 +47,10 @@ typedef struct ENTITY
 		 * se afla in cardul SD
 		 */
 
+
 		uint16_t color; /*culoare pentru formele prime, pe 16 biti*/
 		uint8_t *data; /*buffer de date pentru imagini card SD*/
+		char *filePathName;
 
 	};
 
@@ -63,7 +73,7 @@ void draw_rectangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t
 void draw_entity(ENTITY *entity, char *filePathName);
 void translation_entity(ENTITY *const restrict entity, int16_t x, int16_t y, bool TurnOnStep);//, uint16_t color);
 void translation_test(ENTITY *entity, uint8_t step, uint16_t delay);
-
+void scaling_entity(ENTITY *entity, const uint8_t factor, char *filePathName);
 
 #endif /* INC_GRAPHICS_H_ */
 

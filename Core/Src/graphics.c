@@ -557,6 +557,104 @@ void translation_test(ENTITY *entity, uint8_t step, uint16_t delay)
 }
 
 
+void scaling_entity(ENTITY *entity, const uint8_t factor, char *filePathName)
+{
+	/*
+	 * Functie pentru scalarea unei imagini. Se vor da ca parametrii
+	 * o referinta catre entitatea de scalat si factorul asociat
+	 */
+
+
+	/*
+	 * Initial vom afla noile marimi pentru imaginea
+	 * de scalat
+	 */
+
+	uint16_t x = 0; /*nr d elinii de prelucrat din M1 ai sa avem 32x32 pixeli de prelucrat in M2*/
+	bool flagTerm = 0;
+
+	int i = 0; /*indexi de referinta in M2*/
+	int j = 0;
+	int ik = 0; /*indexi de referinta in M1*/
+	int jk = 0;
+
+	bool flagPixel = 0;
+
+
+	uint8_t *data = malloc(sizeof(uint8_t)*10000);
+	int16_t x1 = 0;
+	int16_t y1 = 0;
+	int16_t index = 0;
+
+	x1 = (int16_t)((entity->x1)*factor);
+	y1 = (int16_t)((entity->y1)*factor);
+
+
+
+	while(!flagTerm)
+	{
+		read_image_file_scaling(filePathName, entity, factor, &x, &flagTerm);
+
+		i = 0;
+		j = 0;
+
+		ik = 0;
+		jk = 0;
+
+		for(int k=0; k<(factor*x*x1*3) ;k++)
+		{
+			/*
+			 * Parcurgem frameul asociat matricei scalate M2
+			 */
+
+			if((k%(x1*3)==0) && (k!=0))
+			{
+				/*
+				 * new line
+				 */
+
+				i++;
+				j = 0;
+			}
+
+			if(k%3 == 0)
+			{
+				flagPixel = 1;
+			}
+
+			if(flagPixel == 1)
+			{
+				ik = (int)i/factor;
+				jk = (int)j/factor;
+
+				index = ik*(entity->x1)*3 + jk*3; /*index normat la M1*/
+
+				data[k] = entity->data[index];
+				data[k+1] = entity->data[index + 1];
+				data[k+2] = entity->data[index + 2];
+
+				j++;
+				flagPixel = 0;
+			}
+
+		}
+
+		/*
+		 * Scriem in fisier datele botinute in frame-ul curent
+		 */
+
+		write_image_file("graphic/imgx.bin", data, (x1*factor)*x*3, x1, y1, flagTerm);
+
+	}
+
+
+	entity->x1=x1;
+	entity->y1=y1;
+	entity->filePathName = "graphic/imgx.bin";
+
+}
+
+
 
 
 
