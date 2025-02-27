@@ -457,39 +457,67 @@ void read_image_file(char *filePathName, ENTITY *entity, uint16_t *indexFlag, bo
 
 
 
-static uint16_t frame_number_x(ENTITY *entity, uint8_t factor)
+static uint16_t frame_number_x(ENTITY *entity, const float factor)
 {
 
 	uint8_t x = 1;
 
-	while((((entity->x1)*factor*factor*x) <= (32*32)))
+	if(factor > 1)
 	{
-		if(x == entity->y1)
+		while((((int)(entity->x1)*factor*factor*x) <= (32*32)))
 		{
-			return x;
+			if(x == entity->y1)
+			{
+				return x;
+			}
+
+			x++;
 		}
 
-		x++;
+
+		if(x==1)
+		{
+			return 1;
+		}
+
+		else
+		{
+			return (x-1);
+		}
 	}
 
-
-	if(x==1)
-	{
-		return 1;
-	}
 
 	else
 	{
-		return (x-1);
-	}
+		while((((int)(entity->x1)*x) <= (32*32)))
+		{
+			if(x == entity->y1)
+			{
+				return x;
+			}
 
+			x++;
+		}
+
+
+		if(x==1)
+		{
+			return 1;
+		}
+
+		else
+		{
+			return (x-1);
+		}
+
+	}
 
 
 }
 
 
 
-void read_image_file_scaling(char *filePathName, ENTITY *entity, const uint8_t factor, uint16_t *px, bool *flagTerm)
+void read_image_file_scaling(char *filePathName, ENTITY *entity, const float factor, uint16_t *px, bool *flagTerm)
 {
 	/*
 	 * Functie pentru citirea in cadre a matricei M1.

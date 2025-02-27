@@ -557,7 +557,7 @@ void translation_test(ENTITY *entity, uint8_t step, uint16_t delay)
 }
 
 
-void scaling_entity(ENTITY *entity, const uint8_t factor, char *filePathName)
+void scaling_entity(ENTITY *entity, const float factor, char *filePathName)
 {
 	/*
 	 * Functie pentru scalarea unei imagini. Se vor da ca parametrii
@@ -601,7 +601,7 @@ void scaling_entity(ENTITY *entity, const uint8_t factor, char *filePathName)
 		ik = 0;
 		jk = 0;
 
-		for(int k=0; k<(factor*x*x1*3) ;k++)
+		for(int k=0; k<((int)(factor*x*x1*3)) ;k++)
 		{
 			/*
 			 * Parcurgem frameul asociat matricei scalate M2
@@ -643,7 +643,7 @@ void scaling_entity(ENTITY *entity, const uint8_t factor, char *filePathName)
 		 * Scriem in fisier datele botinute in frame-ul curent
 		 */
 
-		write_image_file("graphic/imgx.bin", data, (x1*factor)*x*3, x1, y1, flagTerm);
+		write_image_file("graphic/imgx.bin", data, (int)(x1*factor)*x*3, x1, y1, flagTerm);
 
 	}
 
@@ -651,6 +651,9 @@ void scaling_entity(ENTITY *entity, const uint8_t factor, char *filePathName)
 	entity->x1=x1;
 	entity->y1=y1;
 	entity->filePathName = "graphic/imgx.bin";
+
+	free(data);
+	//free(entity->data);
 
 }
 
