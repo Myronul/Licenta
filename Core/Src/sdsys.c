@@ -180,6 +180,36 @@ static int16_t stringHexa_to_int(char *string)
 }
 
 
+char* assign_filePath(const char *filePathName)
+{
+	/*
+	 * Functie pentru asignarea unei cai unui string
+	 * Input: numele efectiv caii de asignat
+	 * Output: adresa char* catre calea
+	 * ! alocat dinamic
+	 */
+
+	char *string;
+	uint8_t i = 0;
+
+
+	while(filePathName[i] != '\0')
+	{
+		i++;
+	}
+
+	i++;
+
+	string = (char*)malloc(sizeof(char)*i);
+	memcpy(string, filePathName, i);
+
+	return string;
+
+
+}
+
+
+
 
 void read_audio_file(char *filePathName, uint32_t *buffer)
 {

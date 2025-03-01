@@ -557,7 +557,7 @@ void translation_test(ENTITY *entity, uint8_t step, uint16_t delay)
 }
 
 
-void scaling_entity(ENTITY *entity, const float factor, char *filePathName)
+void scaling_entity(ENTITY *entity, const float factor, char *filePathName, char *fileName)
 {
 	/*
 	 * Functie pentru scalarea unei imagini. Se vor da ca parametrii
@@ -570,6 +570,12 @@ void scaling_entity(ENTITY *entity, const float factor, char *filePathName)
 	 * de scalat
 	 */
 
+	char *scalFilePath;
+
+	scalFilePath = assign_filePath("graphic/scalare/");
+	scalFilePath = realloc(scalFilePath, strlen(scalFilePath)+ strlen(fileName) +1 );
+	strcat(scalFilePath, fileName);
+
 	uint16_t x = 0; /*nr d elinii de prelucrat din M1 ai sa avem 32x32 pixeli de prelucrat in M2*/
 	bool flagTerm = 0;
 
@@ -581,7 +587,7 @@ void scaling_entity(ENTITY *entity, const float factor, char *filePathName)
 	bool flagPixel = 0;
 
 
-	uint8_t *data = malloc(sizeof(uint8_t)*10000);
+	uint8_t *data = malloc(sizeof(uint8_t)*3072);
 	int16_t x1 = 0;
 	int16_t y1 = 0;
 	int16_t index = 0;
@@ -640,17 +646,18 @@ void scaling_entity(ENTITY *entity, const float factor, char *filePathName)
 		}
 
 		/*
-		 * Scriem in fisier datele botinute in frame-ul curent
+		 * Scriem in fisier datele obitnute din frame-ul curent in fisiserul aferent.
+		 * Fisiserul va fi salvat in folderul de scalare
 		 */
 
-		write_image_file("graphic/imgx.bin", data, (int)(x1*factor)*x*3, x1, y1, flagTerm);
+		write_image_file(scalFilePath, data, (int)(x1*factor)*x*3, x1, y1, flagTerm);
 
 	}
 
 
 	entity->x1=x1;
 	entity->y1=y1;
-	entity->filePathName = "graphic/imgx.bin";
+	entity->filePathName = scalFilePath;
 
 	free(data);
 	//free(entity->data);

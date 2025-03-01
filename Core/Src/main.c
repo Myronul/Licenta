@@ -191,12 +191,18 @@ int main(void)
   entity.x0 = 0;
   entity.y0 = 0;
   entity.id = 0;
-  draw_entity(&entity, "graphic/multi2.bin");
+  draw_entity(&entity, "graphic/img8.bin");
+  HAL_Delay(1000);
+  fill_screen2(0xFFFF);
+  scaling_entity(&entity, 0.5, "graphic/img8.bin", "img8.bin");
+  draw_entity(&entity, entity.filePathName);
+
   HAL_Delay(1000);
 
   fill_screen2(0xFFFF);
-
-  scaling_entity(&entity, 100, "graphic/multi2.bin");
+  draw_entity(&entity, "graphic/multi2.bin");
+  HAL_Delay(1000);
+  scaling_entity(&entity, 100, "graphic/multi2.bin", "multi2.bin");
   draw_entity(&entity, entity.filePathName);
   HAL_Delay(1000);
 
