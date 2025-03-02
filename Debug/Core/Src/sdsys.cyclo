@@ -6,6 +6,6 @@
 ../Core/Src/sdsys.c:183:7:assign_filePath	2
 ../Core/Src/sdsys.c:214:6:read_audio_file	7
 ../Core/Src/sdsys.c:336:6:read_image_file	10
-../Core/Src/sdsys.c:490:17:frame_number_x	8
-../Core/Src/sdsys.c:550:6:read_image_file_scaling	7
-../Core/Src/sdsys.c:694:6:write_image_file	5
+../Core/Src/sdsys.c:490:17:frame_number_x	7
+../Core/Src/sdsys.c:544:6:read_image_file_scaling	7
+../Core/Src/sdsys.c:688:6:write_image_file	5

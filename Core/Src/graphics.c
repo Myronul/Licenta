@@ -570,7 +570,9 @@ void scaling_entity(ENTITY *entity, const float factor, char *filePathName, char
 	 * de scalat
 	 */
 
+	FRESULT res;
 	char *scalFilePath;
+	char *tempFile = "graphic/scalare/temp.bin";
 
 	scalFilePath = assign_filePath("graphic/scalare/");
 	scalFilePath = realloc(scalFilePath, strlen(scalFilePath)+ strlen(fileName) +1 );
@@ -650,10 +652,35 @@ void scaling_entity(ENTITY *entity, const float factor, char *filePathName, char
 		 * Fisiserul va fi salvat in folderul de scalare
 		 */
 
-		write_image_file(scalFilePath, data, (int)(x1*factor)*x*3, x1, y1, flagTerm);
+		write_image_file(tempFile, data, (int)(x1*factor)*x*3, x1, y1, flagTerm);
 
 	}
 
+
+	/*
+	 * Vom sterge vechiul fisier rezultatul unei prelucrari anterioare,
+	 * renumind fisiserul tempFile in care ne-am scris datele din temp.bin in
+	 * numele aferent acestuia stocat in scalFilePath
+	 */
+
+
+	res = f_unlink(scalFilePath);
+
+	if((res != FR_OK) && (res != FR_NO_FILE))
+	{
+		return;
+	}
+
+	res = f_rename(tempFile, scalFilePath);
+
+	if(res != FR_OK)
+	{
+		return;
+	}
+
+	/*
+	 * Atribuim noile valori entitatii prelucrate
+	 */
 
 	entity->x1=x1;
 	entity->y1=y1;

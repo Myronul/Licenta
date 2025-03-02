@@ -39,8 +39,7 @@ typedef struct ENTITY
 	int16_t x1;
 	int16_t y1;
 
-	union
-	{
+
 		/*
 		 * Union folosit pentru a defini entitati prime (forme geometrice
 		 * standard precum cerc, patrat, dreptunghi) sau entitati ale caror imagini
@@ -52,7 +51,7 @@ typedef struct ENTITY
 		uint8_t *data; /*buffer de date pentru imagini card SD*/
 		char *filePathName;
 
-	};
+
 
 
 

@@ -9,6 +9,6 @@
 ../Core/Src/graphics.c:279:6:draw_vertical_line	40	static
 ../Core/Src/graphics.c:303:6:draw_rectangle	48	static
 ../Core/Src/graphics.c:332:6:draw_entity	48	static
-../Core/Src/graphics.c:430:6:translation_entity	56	static
+../Core/Src/graphics.c:430:6:translation_entity	64	static
 ../Core/Src/graphics.c:510:6:translation_test	16	static
 ../Core/Src/graphics.c:560:6:scaling_entity	88	static

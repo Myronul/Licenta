@@ -519,6 +519,8 @@ static uint16_t frame_number_x(ENTITY *entity, const float factor)
 
 	else
 	{
+		x = 0;
+
 		while((((int)(entity->x1)*x) <= (32*32)))
 		{
 			if(x == entity->y1)
@@ -526,19 +528,11 @@ static uint16_t frame_number_x(ENTITY *entity, const float factor)
 				return x;
 			}
 
-			x++;
+			x = x + (int)(1/factor);
 		}
 
 
-		if(x==1)
-		{
-			return 1;
-		}
-
-		else
-		{
-			return (x-1);
-		}
+		return (x-(1/factor));
 
 	}
 
