@@ -105,7 +105,7 @@ unsigned int return_int_value_first_line(char *filePathName, FIL *file)
 
 
 
-static uint16_t string_to_int(char *string)
+inline static uint16_t string_to_int(char *string)
 {
 	unsigned int number = 0;
 
@@ -211,7 +211,7 @@ char* assign_filePath(const char *filePathName)
 
 
 
-void read_audio_file(char *filePathName, uint32_t *buffer)
+void read_audio_file(char *filePathName, uint32_t *buffer, bool *flagAudioDone)
 {
 	/*
 	 * Functie pentru citirea fisierelor audio ce contin
@@ -318,6 +318,8 @@ void read_audio_file(char *filePathName, uint32_t *buffer)
 		/*Resetare flag pentru reinitializare*/
 
 		flagNewAudioFile = 1;
+		*flagAudioDone = 1;
+
 		f_close(&file);
 		return;
 	}

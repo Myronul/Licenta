@@ -90,6 +90,19 @@ void draw_pixel(uint16_t x, uint16_t y, uint16_t color)
 }
 
 
+static inline void draw_pixel_data(uint16_t x, uint16_t y, uint8_t *data)
+{
+	set_adress_window(x,y,x,y, 'w');
+
+	DC_DATA();
+	CS_A();
+
+	HAL_SPI_Transmit(&hspi1, data, 3, HAL_MAX_DELAY);
+
+	CS_D();
+
+}
+
 
 
 void fill_screen1(uint16_t color)
@@ -682,12 +695,90 @@ void scaling_entity(ENTITY *entity, const float factor, char *filePathName, char
 	 * Atribuim noile valori entitatii prelucrate
 	 */
 
+	//free(entity->filePathName);
+
 	entity->x1=x1;
 	entity->y1=y1;
 	entity->filePathName = scalFilePath;
 
 	free(data);
 	//free(entity->data);
+
+}
+
+
+void rotate_entity(ENTITY *entity, int theta)
+{
+	/*
+	 * Functie pentru rotatia unei imagini.
+	 * Rotatia se va realiza in jurul unui pivot(punct de referinta),
+	 * ales ca mijlocul ferestrei de referinta a imaginii.
+	 * Pixelii vor fi compusi si transmisi pe rand.
+	 * Input: referinta catre entitate, unghiul de rotatie
+	 * Output: Void
+	 */
+
+	/*Aflam initial coordonatele pivotului de referinta*/
+
+	const int16_t pivotX = entity->x0 + (int16_t)(entity->x1/2);
+	const int16_t pivotY = entity->y0 + (int16_t)(entity->y1/2);
+
+	int16_t i = (int16_t)(-(entity->y1/2));
+	int16_t j = (int16_t)(-(entity->x1/2));
+
+	int16_t rotPosX = 0;
+	int16_t rotPosY = 0;
+
+	bool flagImgDone = 0;
+	bool flagPixel = 0;
+	uint16_t byteNr = 0;
+
+	uint8_t pixel[3];
+
+
+	while(!flagImgDone)
+	{
+		read_image_file(entity->filePathName, entity, &byteNr, &flagImgDone);
+
+
+		for(int16_t k = 0; k<byteNr; k++)
+		{
+			if(j == (entity->x1/2))
+			{
+				i++;
+				j = (int16_t)(-(entity->x1/2));
+
+			}
+
+			if(k%3 == 0)
+			{
+				flagPixel = 1;
+			}
+
+			if(flagPixel == 1)
+			{
+				pixel[0] = entity->data[k];
+				pixel[1] = entity->data[k+1];
+				pixel[2] = entity->data[k+2];
+
+				/*Test pentru 90 de grade*/
+
+				rotPosX = -i + pivotX;
+				rotPosY =  j + pivotY;
+
+				draw_pixel_data(rotPosX, rotPosY, pixel);
+
+				j++;
+				flagPixel = 0;
+
+			}
+
+
+		}
+	}
+
+
+	free(entity->data);
 
 }
 

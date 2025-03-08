@@ -73,6 +73,7 @@ void draw_entity(ENTITY *entity, char *filePathName);
 void translation_entity(ENTITY *const restrict entity, int16_t x, int16_t y, bool TurnOnStep);//, uint16_t color);
 void translation_test(ENTITY *entity, uint8_t step, uint16_t delay);
 void scaling_entity(ENTITY *entity, const float factor, char *filePathName, char *fileName);
+void rotate_entity(ENTITY *entity, int theta);
 
 #endif /* INC_GRAPHICS_H_ */
 

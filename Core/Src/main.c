@@ -169,6 +169,14 @@ int main(void)
   HAL_TIM_Base_Start(&htim2); /*Initializare timer2 pentru trigger DMA pe DAC*/
 
 
+  /*Test pentru tastatura*/
+
+  fill_screen1(0x0000);
+
+  //play_audio_file("audio/classic.txt");
+  //HAL_Delay(1000);
+  play_audio_file("audio/Bambina.txt"); //doremi mine songita song22
+
 
   fill_screen1(0xF100);
   HAL_Delay(1000);
@@ -188,14 +196,25 @@ int main(void)
 
   fill_screen2(0xFFFF);
 
-  entity.x0 = 0;
-  entity.y0 = 0;
+  entity.x0 = 100;
+  entity.y0 = 100;
   entity.id = 0;
   draw_entity(&entity, "graphic/multi2.bin");
   HAL_Delay(1000);
   fill_screen2(0xFFFF);
-  scaling_entity(&entity, 100, "graphic/multi2.bin", "multi2.bin");
+  scaling_entity(&entity, 38, "graphic/multi2.bin", "multi2.bin");
   draw_entity(&entity, entity.filePathName);
+
+  //--------------------------------------------
+
+  HAL_Delay(1000);
+  fill_screen2(0xFFFF);
+
+  rotate_entity(&entity, 90);
+
+  HAL_Delay(1000);
+
+  //---------------------------------------------
 
   HAL_Delay(1000);
 
@@ -288,32 +307,15 @@ int main(void)
 
   play_audio_file("audio/mine.txt"); //doremi mine songita song22
 
-  char *fileData = NULL;
-  read_file("audio/text.txt", fileData);
-  HAL_Delay(1000);
+  fill_screen2(0xF100);
 
-  uint32_t sampleData[1024]; /*23 de ms pentru redare DMA dintre care 7 ms pentru citire din fisier*/
-  	  	  	  	  	  	  	 /*Vor ramane aproximativ 16 ms pentru prelucrarea frame-ului (pentru 1024 de esantioane)*/
-
-  startTick = HAL_GetTick();
-  read_audio_file("audio/random.txt", sampleData);
-  endTick = HAL_GetTick();
-  getTime = endTick - startTick;
+  //startTick = HAL_GetTick();
+  //read_audio_file("audio/random.txt", sampleData);
+  //endTick = HAL_GetTick();
+  //getTime = endTick - startTick;
 
   HAL_Delay(100);
 
-  startTick = HAL_GetTick();
-  read_audio_file("audio/random.txt", sampleData);
-  endTick = HAL_GetTick();
-  getTime = endTick - startTick;
-
-  HAL_Delay(100);
-  read_audio_file("audio/text.txt", sampleData);
-  HAL_Delay(100);
-  read_audio_file("audio/text.txt", sampleData);
-  HAL_Delay(100);
-  read_audio_file("audio/text.txt", sampleData);
-  HAL_Delay(100);
 
   for(uint8_t i=0;i<100;i++)
   {
@@ -602,7 +604,7 @@ static void MX_TIM2_Init(void)
   htim2.Instance = TIM2;
   htim2.Init.Prescaler = 83;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 23;
+  htim2.Init.Period = 11;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim2) != HAL_OK)

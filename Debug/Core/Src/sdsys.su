@@ -1,11 +1,11 @@
 ../Core/Src/sdsys.c:14:6:init_cardSD	8	static
 ../Core/Src/sdsys.c:29:6:read_file	592	static
 ../Core/Src/sdsys.c:63:14:return_int_value_first_line	48	static
-../Core/Src/sdsys.c:108:17:string_to_int	24	static
+../Core/Src/sdsys.c:108:24:string_to_int	24	static
 ../Core/Src/sdsys.c:126:16:stringHexa_to_int	24	static
 ../Core/Src/sdsys.c:183:7:assign_filePath	24	static
-../Core/Src/sdsys.c:214:6:read_audio_file	640	dynamic
-../Core/Src/sdsys.c:336:6:read_image_file	632	dynamic
-../Core/Src/sdsys.c:490:17:frame_number_x	32	static
-../Core/Src/sdsys.c:544:6:read_image_file_scaling	616	static
-../Core/Src/sdsys.c:688:6:write_image_file	608	static
+../Core/Src/sdsys.c:214:6:read_audio_file	648	dynamic
+../Core/Src/sdsys.c:338:6:read_image_file	632	dynamic
+../Core/Src/sdsys.c:492:17:frame_number_x	32	static
+../Core/Src/sdsys.c:546:6:read_image_file_scaling	616	static
+../Core/Src/sdsys.c:690:6:write_image_file	608	static
