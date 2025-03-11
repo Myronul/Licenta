@@ -1,1 +1,3 @@
-../Core/Src/audio.c:16:6:play_audio_file	6
+../Core/Src/audio.c:18:6:play_audio_file	6
+../Core/Src/audio.c:62:13:vibrato_filter	6
+../Core/Src/audio.c:129:6:play_audio_file_vibrato	14

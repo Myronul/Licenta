@@ -39,6 +39,15 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
+/*Valorile codate predefinite pentru directia controllerului*/
+
+#define DxRight   0x01   /*0b0000 0001*/
+#define DxLeft    0x02   /*0b0000 0010*/
+#define DxUp      0x04   /*0b0000 0100*/
+#define DxDown    0x08   /*0b0000 1000*/
+#define DxStart   0x10   /*0b0001 0000*/
+#define DxSelect  0x20   /*0b0010 0000*/
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -65,7 +74,13 @@ UART_HandleTypeDef huart1;
 volatile uint8_t flagDmaSpiTx = 0; /*flaguri pentru transfer DMA prin SPI*/
 volatile uint8_t flagDmaSpiRx = 0;
 
-volatile bool flagDmaDAC = 0; /*Flag pentru DMA pe DAC si bufferele aferente*/
+volatile bool flagDmaDAC = 0;      /*Flag pentru DMA pe DAC si bufferele aferente*/
+
+/*Variabile pentru controller*/
+
+volatile uint8_t dataController;
+uint8_t currentDx = 0;
+
 
 /* USER CODE END PV */
 
@@ -86,41 +101,86 @@ static void MX_SDIO_SD_Init(void);
 /* USER CODE BEGIN 0 */
 
 
-  void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
-  {
-	  /*
-	   * Functie de CallBack pentru terminarea transferului SPI
-	   * folosind DMA. Odata terminat transferul SPI prin DMA,
-	   * aceasta functia de CallBack se va apela, setandu-ne un flag
-	   * pentru a indica starea acestui transfer de date.
-	   */
+void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
+{
+	/*
+	 * Functie de CallBack pentru terminarea transferului SPI
+	 * folosind DMA. Odata terminat transferul SPI prin DMA,
+	 * aceasta functia de CallBack se va apela, setandu-ne un flag
+	 * pentru a indica starea acestui transfer de date.
+	 */
 
-	  flagDmaSpiTx = 1;
-
-  }
-
-
-  void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi)
-  {
-	  /*
-	   * Functie de CallBack pentru terminarea receptiei datelor
-	   * prin SPI folosind DMA (analog cu functia HAL_SPI_TxCpltCallback)
-	   */
-
-	  flagDmaSpiRx = 1;
-
-  }
+	if(hspi->Instance == SPI1)
+	{
+		flagDmaSpiTx = 1;
+	}
 
 
-  void HAL_DAC_ConvHalfCpltCallbackCh1(DAC_HandleTypeDef *hdac)
-  {
-      /*
-       * Functie de CallBack pentru finalizare 1/2 din transfer DMA pe DAC
-       */
 
-	  flagDmaDAC = 1;
+}
 
-  }
+
+void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi)
+{
+
+	/*
+	 * Functie de CallBack pentru terminarea receptiei datelor
+	 * prin SPI folosind DMA (analog cu functia HAL_SPI_TxCpltCallback)
+	 */
+
+	if(hspi->Instance == SPI1)
+	{
+		/*
+		 * SPI1 folosit pentru LCD
+		 */
+
+		flagDmaSpiRx = 1;
+
+	}
+
+
+	if(hspi->Instance == SPI2)
+	{
+		/*
+		 * Receptionare comenzi controller
+		 */
+
+		switch(dataController)
+		{
+		  	case DxRight:
+		  	  currentDx = DxRight;
+		  	  break;
+		  	case DxLeft:
+		  	  currentDx = DxLeft;
+		  	  break;
+		  	case DxUp:
+		  	  currentDx = DxUp;
+		  	  break;
+		  	case DxDown:
+		  	  currentDx = DxDown;
+		  	  break;
+		  	case DxStart:
+		  	  currentDx = DxStart;
+		  	  break;
+		  	default:
+		  	  currentDx = 0x00;
+		  	  break;
+		}
+
+	}
+
+}
+
+
+void HAL_DAC_ConvHalfCpltCallbackCh1(DAC_HandleTypeDef *hdac)
+{
+    /*
+     * Functie de CallBack pentru finalizare 1/2 din transfer DMA pe DAC
+     */
+
+	flagDmaDAC = 1;
+
+}
 
 
 
@@ -173,8 +233,8 @@ int main(void)
 
   fill_screen1(0x0000);
 
-  //play_audio_file("audio/classic.txt");
-  //HAL_Delay(1000);
+  play_audio_file("audio/BeBack.txt");
+  HAL_Delay(1000);
   play_audio_file("audio/Bambina.txt"); //doremi mine songita song22
 
 
@@ -602,9 +662,9 @@ static void MX_TIM2_Init(void)
 
   /* USER CODE END TIM2_Init 1 */
   htim2.Instance = TIM2;
-  htim2.Init.Prescaler = 83;
+  htim2.Init.Prescaler = 83;//83
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 11;
+  htim2.Init.Period = 11;//11
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
