@@ -233,9 +233,10 @@ int main(void)
 
   fill_screen1(0x0000);
 
-  play_audio_file("audio/BeBack.txt");
   HAL_Delay(1000);
-  play_audio_file("audio/Bambina.txt"); //doremi mine songita song22
+  play_audio_file("Audio/acoustic.txt");
+  HAL_Delay(1000);
+  play_audio_file_vibrato("Audio/king.txt"); //doremi mine songita song22 king acoustic bambina
 
 
   fill_screen1(0xF100);
