@@ -1,3 +1,5 @@
 ../Core/Src/audio.c:18:6:play_audio_file	32	static
 ../Core/Src/audio.c:62:13:vibrato_filter	24	static
-../Core/Src/audio.c:129:6:play_audio_file_vibrato	32	static
+../Core/Src/audio.c:120:6:play_audio_file_vibrato	32	static
+../Core/Src/audio.c:235:13:echo_filter	32	static
+../Core/Src/audio.c:291:6:play_audio_file_echo	40	static

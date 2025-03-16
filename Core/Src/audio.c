@@ -64,33 +64,33 @@ static void vibrato_filter(int8_t delay)
 	/*
 	 * Functie pentru prelucrarea esantioanelor pentru a obtine un efect vibrato.
 	 * Se va folosi un delay variat in timp. Vom folosi o perioada de 5 HZ a variatiei
-	 * delay-ului intre valorile de amplitudine +2ms si -2ms (efect sinusoidal)
+	 * delay-ului intre valorile de intarzieri predefinite (efect sinusoidal)
 	 * Input: Delay care indica valorile de delay
-	 * ce se schimba la fiecare 8192 de esantioane citite 0 +2ms -2ms
+	 * ce se schimba la fiecare 8192 de esantioane citite 0 2ms 4ms etc
 	 * FlagBuffer ne spune in ce buffer ne aflam in momentul prelucrarii 0 sau 1
 	 * (prima jumatate sau a doua)
 	 * Output: Void
 	 */
 
-	int index = (int)((delay*1000)/22.67);
+	int16_t index = (int16_t)((delay*1000)/22.67);
 
 	if(flagBuffer == 0)
 	{
 		/*Prima jumatate a bufferului*/
 
-		for(uint16_t i=0; i<1024; i++)
+		for(int16_t i=1023; i>=0; i--)
 		{
 
-			if(i+index < 0)
+			if(i<index)
 			{
 				/*Pentru cazul intarzierii*/
 
-				buffer[i] = buffer[2047+(index+i)+1];
+				buffer[i] = buffer[2047-(index-i)+1];
 				continue;
 			}
 
 
-			buffer[i] = buffer[i+index];
+			buffer[i] = buffer[i-index];
 
 		}
 
@@ -100,19 +100,10 @@ static void vibrato_filter(int8_t delay)
 	{
 		/*A doua jumatate a bufferului*/
 
-		for(uint16_t i=1024; i<2048; i++)
+		for(uint16_t i=2047; i>=1024; i--)
 		{
 
-			if(i+index > 2048)
-			{
-				/*Pentru cazul anticiparii*/
-
-				buffer[i] = buffer[((i+index)-2047)-1];
-				continue;
-			}
-
-
-			buffer[i] = buffer[i+index];
+			buffer[i] = buffer[i-index];
 
 		}
 
@@ -141,7 +132,7 @@ void play_audio_file_vibrato(char *path)
 
 	int8_t delay = 0;
 	uint8_t k = 0; /*determinam intervalul de timp cand schimbam delayul -> la fiecare 8*1024 esantioane*/
-	int8_t delayArray[3] = {0,2,4};
+	int8_t delayArray[] = {10,12,14};
 	uint8_t delayIndex = 1;
 	bool flagDx = 0;
 
@@ -241,24 +232,63 @@ void play_audio_file_vibrato(char *path)
 }
 
 
-static void echo_filter(int8_t delay)
+static void echo_filter(int8_t delay, float alpha)
 {
 	/*
 	 * Functie pentru prelucrarea bufferului audio in vederea
 	 * obtinerii unui efect de ecou. Se prelucreaza sub forma
 	 * unui filtru FIR exprimat prin:
 	 * y[n] = x[n] + a*x[n-delay]
+	 * Input: valoarea delay-ului in ms
+	 * 		  coeficientul de atenuare alpha
+	 * 		  alpha = [0,1]
+	 * Output: void
 	 */
 
-	uint16_t index = (uint16_t) delay/0.022; /*Impartim delay-ul la timpul necesar redarii unui esantion*/
+	int16_t index = (int16_t)((delay*1000)/22.67); /*Impartim delay-ul la timpul necesar redarii unui esantion*/
+												   /*index va fi valoarea delay-ului in numar de esantioane*/
 
 
+	if(flagBuffer == 0)
+	{
+		/*Prima jumatate a bufferului*/
+
+		for(int16_t i=1023; i>=0; i--)
+		{
+
+			if(i<index)
+			{
+
+				buffer[i] += (uint32_t)alpha*buffer[2047-(index-i)+1];
+				continue;
+			}
+
+			buffer[i] += (uint32_t)alpha*buffer[i-index];
+
+		}
+
+	}
+
+	else
+	{
+		/*A doua jumatate a bufferului*/
+
+		for(int16_t i=2047; i>=1024; i--)
+		{
+
+			buffer[i] += (uint32_t)alpha*buffer[i-index];
+		}
+
+	}
+
+
+	flagBuffer = !flagBuffer; /*schimbam jumatatea bufferului*/
 
 
 }
 
 
-void play_audio_file_echo(char *path)
+void play_audio_file_echo(char *path, int8_t delay, float alpha)
 {
 	/*
 	 * Functie pentru redarea unui fisier audio din cardul cu efect ecou SD.
@@ -271,7 +301,6 @@ void play_audio_file_echo(char *path)
 	bool flagAudioDone = 0;
 	flagBuffer = 1; /*Incepem din a doua jumatate*/
 
-	int8_t delay = 0;
 
 	if(buffer == NULL)
 	{
@@ -286,13 +315,13 @@ void play_audio_file_echo(char *path)
 	while(!flagAudioDone)
 	{
 		read_audio_file(path, buffer+1024, &flagAudioDone);
-		echo_filter(delay);
+		echo_filter(delay, alpha);
 
 		while(flagDmaDAC == 0);
 		flagDmaDAC = 0;
 
 		read_audio_file(path, buffer, &flagAudioDone);
-		echo_filter(delay);
+		echo_filter(delay, alpha);
 
 		while(flagDmaDAC == 0);
 		flagDmaDAC = 0;

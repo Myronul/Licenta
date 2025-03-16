@@ -13,6 +13,6 @@
 
 void play_audio_file(char *path);
 void play_audio_file_vibrato(char *path);
-void play_audio_file_echo(char *path);
+void play_audio_file_echo(char *path, int8_t delay, float alpha);
 
 #endif /* INC_AUDIO_H_ */

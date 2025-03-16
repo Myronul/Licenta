@@ -233,10 +233,16 @@ int main(void)
 
   fill_screen1(0x0000);
 
-  HAL_Delay(1000);
+  //HAL_Delay(1000);
   play_audio_file("Audio/acoustic.txt");
   HAL_Delay(1000);
-  play_audio_file_vibrato("Audio/king.txt"); //doremi mine songita song22 king acoustic bambina
+  play_audio_file_vibrato("Audio/acoustic.txt");
+  HAL_Delay(1000);
+  play_audio_file_echo("Audio/acoustic.txt", 22, 0.99);
+  HAL_Delay(1000);
+  play_audio_file_echo("Audio/acoustic.txt", 22, 0);
+  HAL_Delay(1000);
+  play_audio_file("Audio/king.txt"); //doremi mine songita song22 king acoustic bambina
 
 
   fill_screen1(0xF100);
