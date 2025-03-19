@@ -7,19 +7,19 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
   1 .text         0000d7c8  08000188  08000188  00001188  2**3
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .rodata       00000f6c  0800d950  0800d950  0000e950  2**2
+  2 .rodata       00000f84  0800d950  0800d950  0000e950  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  3 .ARM.extab    00000000  0800e8bc  0800e8bc  00010068  2**0
+  3 .ARM.extab    00000000  0800e8d4  0800e8d4  00010068  2**0
                   CONTENTS
-  4 .ARM          00000008  0800e8bc  0800e8bc  0000f8bc  2**2
+  4 .ARM          00000008  0800e8d4  0800e8d4  0000f8d4  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  5 .preinit_array 00000000  0800e8c4  0800e8c4  00010068  2**0
+  5 .preinit_array 00000000  0800e8dc  0800e8dc  00010068  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  6 .init_array   00000004  0800e8c4  0800e8c4  0000f8c4  2**2
+  6 .init_array   00000004  0800e8dc  0800e8dc  0000f8dc  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  7 .fini_array   00000004  0800e8c8  0800e8c8  0000f8c8  2**2
+  7 .fini_array   00000004  0800e8e0  0800e8e0  0000f8e0  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  8 .data         00000068  20000000  0800e8cc  00010000  2**2
+  8 .data         00000068  20000000  0800e8e4  00010000  2**2
                   CONTENTS, ALLOC, LOAD, DATA
   9 .ccmram       00000000  10000000  10000000  00010068  2**0
                   CONTENTS
@@ -29,25 +29,25 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   ALLOC
  12 .ARM.attributes 00000030  00000000  00000000  00010068  2**0
                   CONTENTS, READONLY
- 13 .debug_info   0001a863  00000000  00000000  00010098  2**0
+ 13 .debug_info   0001a95f  00000000  00000000  00010098  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_abbrev 00003dda  00000000  00000000  0002a8fb  2**0
+ 14 .debug_abbrev 00003df3  00000000  00000000  0002a9f7  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_aranges 00001800  00000000  00000000  0002e6d8  2**3
+ 15 .debug_aranges 00001810  00000000  00000000  0002e7f0  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_rnglists 0000129a  00000000  00000000  0002fed8  2**0
+ 16 .debug_rnglists 000012a8  00000000  00000000  00030000  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_macro  00025b5f  00000000  00000000  00031172  2**0
+ 17 .debug_macro  00025b57  00000000  00000000  000312a8  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_line   0001fb76  00000000  00000000  00056cd1  2**0
+ 18 .debug_line   0001fd53  00000000  00000000  00056dff  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_str    000d6c03  00000000  00000000  00076847  2**0
+ 19 .debug_str    000d6c35  00000000  00000000  00076b52  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 20 .comment      00000043  00000000  00000000  0014d44a  2**0
+ 20 .comment      00000043  00000000  00000000  0014d787  2**0
                   CONTENTS, READONLY
- 21 .debug_frame  00006a10  00000000  00000000  0014d490  2**2
+ 21 .debug_frame  00006a64  00000000  00000000  0014d7cc  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 22 .debug_line_str 0000006c  00000000  00000000  00153ea0  2**0
+ 22 .debug_line_str 0000006c  00000000  00000000  00154230  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -4122,8 +4122,8 @@ void scaling_entity(ENTITY *entity, const float factor, char *filePathName, char
  8002152:	46bd      	mov	sp, r7
  8002154:	bd90      	pop	{r4, r7, pc}
  8002156:	bf00      	nop
- 8002158:	0800d954 	.word	0x0800d954
- 800215c:	0800d970 	.word	0x0800d970
+ 8002158:	0800d96c 	.word	0x0800d96c
+ 800215c:	0800d988 	.word	0x0800d988
  8002160:	55555556 	.word	0x55555556
 
 08002164 <rotate_entity>:
@@ -6013,20 +6013,20 @@ int main(void)
 			  continue;
  8002dc2:	e028      	b.n	8002e16 <main+0x3ca>
  8002dc4:	2000029c 	.word	0x2000029c
- 8002dc8:	0800d984 	.word	0x0800d984
+ 8002dc8:	0800d99c 	.word	0x0800d99c
  8002dcc:	3f7d70a4 	.word	0x3f7d70a4
  8002dd0:	00000000 	.word	0x00000000
- 8002dd4:	0800d998 	.word	0x0800d998
- 8002dd8:	0800d9a8 	.word	0x0800d9a8
- 8002ddc:	0800d9bc 	.word	0x0800d9bc
+ 8002dd4:	0800d9b0 	.word	0x0800d9b0
+ 8002dd8:	0800d9c0 	.word	0x0800d9c0
+ 8002ddc:	0800d9d4 	.word	0x0800d9d4
  8002de0:	42180000 	.word	0x42180000
- 8002de4:	0800d9c8 	.word	0x0800d9c8
- 8002de8:	0800d9dc 	.word	0x0800d9dc
- 8002dec:	0800d9f0 	.word	0x0800d9f0
- 8002df0:	0800da04 	.word	0x0800da04
- 8002df4:	0800da18 	.word	0x0800da18
- 8002df8:	0800da2c 	.word	0x0800da2c
- 8002dfc:	0800da40 	.word	0x0800da40
+ 8002de4:	0800d9e0 	.word	0x0800d9e0
+ 8002de8:	0800d9f4 	.word	0x0800d9f4
+ 8002dec:	0800da08 	.word	0x0800da08
+ 8002df0:	0800da1c 	.word	0x0800da1c
+ 8002df4:	0800da30 	.word	0x0800da30
+ 8002df8:	0800da44 	.word	0x0800da44
+ 8002dfc:	0800da58 	.word	0x0800da58
 		  }
 
 
@@ -6188,7 +6188,7 @@ int main(void)
   while (1)
  8002f34:	bf00      	nop
  8002f36:	e7fd      	b.n	8002f34 <main+0x4e8>
- 8002f38:	0800da50 	.word	0x0800da50
+ 8002f38:	0800da68 	.word	0x0800da68
  8002f3c:	04030201 	.word	0x04030201
  8002f40:	20000184 	.word	0x20000184
  8002f44:	2000032c 	.word	0x2000032c
@@ -6949,7 +6949,7 @@ void init_cardSD()
  800335a:	bf00      	nop
  800335c:	bd80      	pop	{r7, pc}
  800335e:	bf00      	nop
- 8003360:	0800da60 	.word	0x0800da60
+ 8003360:	0800da78 	.word	0x0800da78
  8003364:	20000334 	.word	0x20000334
 
 08003368 <string_to_int>:
@@ -7768,7 +7768,7 @@ void read_image_file(char *filePathName, ENTITY *entity, uint16_t *indexFlag, bo
  8003978:	20000570 	.word	0x20000570
  800397c:	20000574 	.word	0x20000574
  8003980:	20000578 	.word	0x20000578
- 8003984:	0800e804 	.word	0x0800e804
+ 8003984:	0800e81c 	.word	0x0800e81c
  8003988:	2000057c 	.word	0x2000057c
 	{
 		/*Vom parcurge bufferul la intervale de 2 valori HEXA, preluand caracterele ascii
@@ -9883,7 +9883,7 @@ LoopFillZerobss:
   ldr r1, =_edata
  80046a8:	20000068 	.word	0x20000068
   ldr r2, =_sidata
- 80046ac:	0800e8cc 	.word	0x0800e8cc
+ 80046ac:	0800e8e4 	.word	0x0800e8e4
   ldr r2, =_sbss
  80046b0:	20000068 	.word	0x20000068
   ldr r4, =_ebss
@@ -12837,7 +12837,7 @@ static uint32_t DMA_CalcBaseAndBitshift(DMA_HandleTypeDef *hdma)
  800555c:	4770      	bx	lr
  800555e:	bf00      	nop
  8005560:	aaaaaaab 	.word	0xaaaaaaab
- 8005564:	0800e820 	.word	0x0800e820
+ 8005564:	0800e838 	.word	0x0800e838
 
 08005568 <DMA_CheckFifoParam>:
   * @param  hdma       pointer to a DMA_HandleTypeDef structure that contains
@@ -14801,7 +14801,7 @@ HAL_StatusTypeDef HAL_RCC_ClockConfig(RCC_ClkInitTypeDef  *RCC_ClkInitStruct, ui
  8006072:	bf00      	nop
  8006074:	40023c00 	.word	0x40023c00
  8006078:	40023800 	.word	0x40023800
- 800607c:	0800e808 	.word	0x0800e808
+ 800607c:	0800e820 	.word	0x0800e820
  8006080:	2000000c 	.word	0x2000000c
  8006084:	20000010 	.word	0x20000010
 
@@ -15105,7 +15105,7 @@ uint32_t HAL_RCC_GetPCLK1Freq(void)
  80062c8:	4618      	mov	r0, r3
  80062ca:	bd80      	pop	{r7, pc}
  80062cc:	40023800 	.word	0x40023800
- 80062d0:	0800e818 	.word	0x0800e818
+ 80062d0:	0800e830 	.word	0x0800e830
 
 080062d4 <HAL_RCC_GetPCLK2Freq>:
   * @note   Each time PCLK2 changes, this function must be called to update the
@@ -15131,7 +15131,7 @@ uint32_t HAL_RCC_GetPCLK2Freq(void)
  80062f0:	4618      	mov	r0, r3
  80062f2:	bd80      	pop	{r7, pc}
  80062f4:	40023800 	.word	0x40023800
- 80062f8:	0800e818 	.word	0x0800e818
+ 80062f8:	0800e830 	.word	0x0800e830
 
 080062fc <HAL_SD_Init>:
             SD_HandleTypeDef and create the associated handle.
@@ -26591,7 +26591,7 @@ void MX_FATFS_Init(void)
  800a4c4:	bf00      	nop
  800a4c6:	bd80      	pop	{r7, pc}
  800a4c8:	200005a4 	.word	0x200005a4
- 800a4cc:	0800e828 	.word	0x0800e828
+ 800a4cc:	0800e840 	.word	0x0800e840
  800a4d0:	200005a0 	.word	0x200005a0
 
 0800a4d4 <get_fattime>:
@@ -30597,8 +30597,8 @@ FRESULT create_name (	/* FR_OK: successful, FR_INVALID_NAME: could not create */
  800bbf2:	46bd      	mov	sp, r7
  800bbf4:	bd80      	pop	{r7, pc}
  800bbf6:	bf00      	nop
- 800bbf8:	0800e83c 	.word	0x0800e83c
- 800bbfc:	0800da64 	.word	0x0800da64
+ 800bbf8:	0800e854 	.word	0x0800e854
+ 800bbfc:	0800da7c 	.word	0x0800da7c
 
 0800bc00 <follow_path>:
 static
@@ -34905,10 +34905,10 @@ uint8_t FATFS_LinkDriver(const Diskio_drvTypeDef *drv, char *path)
  800d85e:	4798      	blx	r3
  800d860:	3601      	adds	r6, #1
  800d862:	e7f2      	b.n	800d84a <__libc_init_array+0x1e>
- 800d864:	0800e8c4 	.word	0x0800e8c4
- 800d868:	0800e8c4 	.word	0x0800e8c4
- 800d86c:	0800e8c4 	.word	0x0800e8c4
- 800d870:	0800e8c8 	.word	0x0800e8c8
+ 800d864:	0800e8dc 	.word	0x0800e8dc
+ 800d868:	0800e8dc 	.word	0x0800e8dc
+ 800d86c:	0800e8dc 	.word	0x0800e8dc
+ 800d870:	0800e8e0 	.word	0x0800e8e0
 
 0800d874 <__retarget_lock_acquire_recursive>:
  800d874:	4770      	bx	lr

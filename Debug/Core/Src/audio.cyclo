@@ -3,3 +3,5 @@
 ../Core/Src/audio.c:120:6:play_audio_file_vibrato	14
 ../Core/Src/audio.c:235:13:echo_filter	5
 ../Core/Src/audio.c:291:6:play_audio_file_echo	6
+../Core/Src/audio.c:340:13:reverb_filter	7
+../Core/Src/audio.c:415:6:play_audio_file_reverb	6

@@ -3,3 +3,5 @@
 ../Core/Src/audio.c:120:6:play_audio_file_vibrato	32	static
 ../Core/Src/audio.c:235:13:echo_filter	32	static
 ../Core/Src/audio.c:291:6:play_audio_file_echo	40	static
+../Core/Src/audio.c:340:13:reverb_filter	48	static
+../Core/Src/audio.c:415:6:play_audio_file_reverb	32	static
