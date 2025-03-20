@@ -13,14 +13,6 @@
 #include "font.h"
 
 
-typedef struct INFO
-{
-	uint8_t *data;
-	char *filePathName;
-
-}INFO;
-
-
 typedef struct ENTITY
 {
 	/*
@@ -32,7 +24,7 @@ typedef struct ENTITY
 	 */
 
 	uint8_t id; /*Daca MSB este 0 imaginea este stocata pe cardul SD */
-
+				/*MSB = 1 pentru imagine prima si MSB = 11 imagine locala *data*/
 	int16_t x0;
 	int16_t y0;
 
@@ -40,22 +32,37 @@ typedef struct ENTITY
 	int16_t y1;
 
 
+	union
+	{
 		/*
 		 * Union folosit pentru a defini entitati prime (forme geometrice
 		 * standard precum cerc, patrat, dreptunghi) sau entitati ale caror imagini
 		 * se afla in cardul SD
 		 */
 
+		struct
+		{
+			uint8_t *data; /*buffer de date pentru imagini card SD*/
+			char *filePathName;
+
+		}SD; /*Card SD*/
+
+
+		struct
+		{
+			uint8_t *data;     /*buffer de date in cazul datelor locale formate*/
+			unsigned int size; /*marimea in octeti a bufferului data*/
+
+		}LC; /*Buffer local*/
 
 		uint16_t color; /*culoare pentru formele prime, pe 16 biti*/
-		uint8_t *data; /*buffer de date pentru imagini card SD*/
-		char *filePathName;
 
 
-
+	}ST; /*Select Type: SD, culoare prima sau  date brute locale*/
 
 
 }ENTITY;
+
 
 
 void write_color(uint16_t color);
@@ -69,10 +76,13 @@ void print_string(uint16_t x, uint16_t y, char* string, uint8_t n, uint16_t font
 void draw_horizontal_line(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t color);
 void draw_vertical_line(uint16_t x0, uint16_t y0, uint16_t y1, uint16_t color);
 void draw_rectangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color);
-void draw_entity(ENTITY *entity, char *filePathName);
+
+void init_entity_sd(ENTITY *entity);
+void free_entity_sd(ENTITY *entity);
+void draw_entity(ENTITY *entity);
 void translation_entity(ENTITY *const restrict entity, int16_t x, int16_t y, bool TurnOnStep);//, uint16_t color);
 void translation_test(ENTITY *entity, uint8_t step, uint16_t delay);
-void scaling_entity(ENTITY *entity, const float factor, char *filePathName, char *fileName);
+void scaling_entity(ENTITY *entity, const float factor);
 void rotate_entity(ENTITY *entity, int theta);
 
 #endif /* INC_GRAPHICS_H_ */

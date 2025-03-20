@@ -349,8 +349,8 @@ static void reverb_filter(void)
 	 * Output: void
 	 */
 
-	int16_t k[] = {220,440,660,880}; /*coeficientii efectului Reverb precalculati (delayurile)*/
-	float gain[] = {0.3,0.25,0.2,0.15}; /*valorile de gain asociate*/
+	int16_t k[4] = {220,440,660,880}; /*coeficientii efectului Reverb precalculati (delayurile)*/
+	float gain[4] = {0.3,0.25,0.2,0.15}; /*valorile de gain asociate*/
 
 	float coefSum = 0; /*variabila intermediara de calculare a sumei de coeficienti*/
 
@@ -361,7 +361,7 @@ static void reverb_filter(void)
 		for(int16_t i=0; i<1024; i++)
 		{
 
-			for(int8_t j=0; j<4; i++)
+			for(int8_t j=0; j<4; j++)
 			{
 
 				if(i<k[j])
@@ -390,7 +390,7 @@ static void reverb_filter(void)
 		for(int16_t i=1024; i<2048; i++)
 		{
 
-			for(int8_t j=0; j<4; i++)
+			for(int8_t j=0; j<4; j++)
 			{
 
 				coefSum += (uint32_t)gain[j]*buffer[i-k[j]];

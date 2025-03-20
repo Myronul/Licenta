@@ -4,8 +4,10 @@
 ../Core/Src/sdsys.c:108:24:string_to_int	24	static
 ../Core/Src/sdsys.c:126:16:stringHexa_to_int	24	static
 ../Core/Src/sdsys.c:183:7:assign_filePath	24	static
-../Core/Src/sdsys.c:214:6:read_audio_file	648	dynamic
-../Core/Src/sdsys.c:338:6:read_image_file	632	dynamic
-../Core/Src/sdsys.c:492:17:frame_number_x	32	static
-../Core/Src/sdsys.c:546:6:read_image_file_scaling	616	static
-../Core/Src/sdsys.c:690:6:write_image_file	608	static
+../Core/Src/sdsys.c:212:7:return_file_name_current_path	24	static
+../Core/Src/sdsys.c:243:6:assign_file_path_entity	16	static
+../Core/Src/sdsys.c:258:6:read_audio_file	648	dynamic
+../Core/Src/sdsys.c:382:6:read_image_file	632	dynamic
+../Core/Src/sdsys.c:536:17:frame_number_x	32	static
+../Core/Src/sdsys.c:590:6:read_image_file_scaling	616	static
+../Core/Src/sdsys.c:734:6:write_image_file	608	static

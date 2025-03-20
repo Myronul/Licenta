@@ -209,6 +209,50 @@ char* assign_filePath(const char *filePathName)
 }
 
 
+char* return_file_name_current_path(char *filePathName)
+{
+	/*
+	 * Functie pentru a returna string-ul aferent
+	 * fisierului din calea curenta
+	 * Input: calea fisierului
+	 * Output: pointer catre nume
+	 */
+
+
+	char *fileName = strrchr(filePathName, '/');
+
+	if(fileName == NULL)
+	{
+		fileName = filePathName;
+		return fileName;
+	}
+
+	else
+	{
+		fileName++;
+	}
+
+	char *string = malloc(strlen(fileName) + 1);
+	strcpy(string, fileName);
+
+	return string;
+
+}
+
+
+void assign_file_path_entity(ENTITY *entity, const char *filePathName)
+{
+	/*
+	 * Functie pentru asignarea unei noi cai entitatii.
+	 * Se va considera deja memoria alocata dinamic pentru bufferul FilePathathName
+	 * Input: adresa entitatii si calea literara
+	 * Output: Void
+	 */
+
+
+	strcpy(entity->ST.SD.filePathName, filePathName);
+
+}
 
 
 void read_audio_file(char *filePathName, uint32_t *buffer, bool *flagAudioDone)
@@ -335,7 +379,7 @@ void read_audio_file(char *filePathName, uint32_t *buffer, bool *flagAudioDone)
 }
 
 
-void read_image_file(char *filePathName, ENTITY *entity, uint16_t *indexFlag, bool *flagImgDone)
+void read_image_file(ENTITY *entity, uint16_t *indexFlag, bool *flagImgDone)
 {
 	/*
 	 * Functie pentru citirea in format binar a unui fisier.txt
@@ -358,7 +402,7 @@ void read_image_file(char *filePathName, ENTITY *entity, uint16_t *indexFlag, bo
 	FIL file;
 	UINT byteRead;
 
-	res = f_open(&file, filePathName, FA_READ);
+	res = f_open(&file, entity->ST.SD.filePathName, FA_READ);
 
 	if(res != FR_OK)
 	{
@@ -406,14 +450,14 @@ void read_image_file(char *filePathName, ENTITY *entity, uint16_t *indexFlag, bo
 		if((entity->x1)*(entity->y1) < 1024)
 		{
 			/*Pentru un singur frame alocam exact cat trebuie */
-			entity->data = malloc(3*sizeof(char)*(entity->x1)*(entity->y1));
+			entity->ST.SD.data = malloc(3*sizeof(char)*(entity->x1)*(entity->y1));
 
 		}
 
 		else
 		{
 			/*Alocam maxim 3072 de octeti per frame*/
-			entity->data = malloc(sizeof(char)*3072);
+			entity->ST.SD.data = malloc(sizeof(char)*3072);
 		}
 
 		flagNewImageFile = 0;
@@ -460,7 +504,7 @@ void read_image_file(char *filePathName, ENTITY *entity, uint16_t *indexFlag, bo
 		/*Vom parcurge bufferul la intervale de 2 valori HEXA, preluand caracterele ascii
 		 * pe care le vom transforma in zecimal ex: FF1200FE3000...*/
 
-		entity->data[i] = tempBuffer[i];
+		entity->ST.SD.data[i] = tempBuffer[i];
 
 	}
 
@@ -621,13 +665,13 @@ void read_image_file_scaling(char *filePathName, ENTITY *entity, const float fac
 		{
 			flagOneFrame = 1;
 			nrFrames = 1; /*Avem o imagine care scalata are mai putini de 32x32 pixeli*/
-			entity->data = malloc(3*sizeof(char)*(entity->x1)*(entity->y1));
+			entity->ST.SD.data = malloc(3*sizeof(char)*(entity->x1)*(entity->y1));
 
 		}
 
 		else
 		{
-			entity->data = malloc(3*sizeof(char)*(entity->x1)*x);
+			entity->ST.SD.data = malloc(3*sizeof(char)*(entity->x1)*x);
 
 			nrFrames = (entity->y1) / x;
 
@@ -650,7 +694,7 @@ void read_image_file_scaling(char *filePathName, ENTITY *entity, const float fac
 
 	if(flagOneFrame == 1)
 	{
-		f_read(&file, entity->data, (3*sizeof(char)*(entity->x1)*(entity->y1)), &byteRead);
+		f_read(&file, entity->ST.SD.data, (3*sizeof(char)*(entity->x1)*(entity->y1)), &byteRead);
 
 		*flagTerm = 1;
 		flagNewImageFile = 1;
@@ -661,7 +705,7 @@ void read_image_file_scaling(char *filePathName, ENTITY *entity, const float fac
 
 	else
 	{
-		f_read(&file, entity->data, (3*sizeof(char)*(entity->x1)*x), &byteRead);
+		f_read(&file, entity->ST.SD.data, (3*sizeof(char)*(entity->x1)*x), &byteRead);
 
 		currentFrame++;
 

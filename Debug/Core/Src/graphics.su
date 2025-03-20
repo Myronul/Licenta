@@ -9,8 +9,10 @@
 ../Core/Src/graphics.c:268:6:draw_horizontal_line	40	static
 ../Core/Src/graphics.c:292:6:draw_vertical_line	40	static
 ../Core/Src/graphics.c:316:6:draw_rectangle	48	static
-../Core/Src/graphics.c:345:6:draw_entity	48	static
-../Core/Src/graphics.c:443:6:translation_entity	64	static
-../Core/Src/graphics.c:523:6:translation_test	16	static
-../Core/Src/graphics.c:573:6:scaling_entity	88	static
-../Core/Src/graphics.c:710:6:rotate_entity	40	static
+../Core/Src/graphics.c:345:6:init_entity_sd	16	static
+../Core/Src/graphics.c:356:6:free_entity_sd	16	static
+../Core/Src/graphics.c:363:6:draw_entity	48	static
+../Core/Src/graphics.c:472:6:translation_entity	64	static
+../Core/Src/graphics.c:552:6:translation_test	16	static
+../Core/Src/graphics.c:602:6:scaling_entity	88	static
+../Core/Src/graphics.c:741:6:rotate_entity	40	static

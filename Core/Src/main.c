@@ -234,15 +234,17 @@ int main(void)
   fill_screen1(0x0000);
 
   //HAL_Delay(1000);
-  play_audio_file("Audio/acoustic.txt");
-  HAL_Delay(1000);
-  play_audio_file_vibrato("Audio/acoustic.txt");
-  HAL_Delay(1000);
-  play_audio_file_echo("Audio/acoustic.txt", 22, 0.99);
-  HAL_Delay(1000);
-  play_audio_file_echo("Audio/acoustic.txt", 22, 0);
-  HAL_Delay(1000);
-  play_audio_file("Audio/king.txt"); //doremi mine songita song22 king acoustic bambina
+  //play_audio_file("Audio/acoustic.txt");
+  //HAL_Delay(1000);
+  //play_audio_file_reverb("Audio/acoustic.txt");
+  //HAL_Delay(1000);
+  //play_audio_file_vibrato("Audio/acoustic.txt");
+  //HAL_Delay(1000);
+  //play_audio_file_echo("Audio/acoustic.txt", 22, 0.99);
+  //HAL_Delay(1000);
+  //play_audio_file_echo("Audio/acoustic.txt", 22, 0);
+  //HAL_Delay(1000);
+  //play_audio_file("Audio/king.txt"); //doremi mine songita song22 king acoustic bambina
 
 
   fill_screen1(0xF100);
@@ -257,7 +259,7 @@ int main(void)
   unsigned int getTime = 0;
 
   ENTITY entity;
-
+  init_entity_sd(&entity);
 
   /*Test SCALARE*/
 
@@ -266,11 +268,12 @@ int main(void)
   entity.x0 = 100;
   entity.y0 = 100;
   entity.id = 0;
-  draw_entity(&entity, "graphic/multi2.bin");
+  assign_file_path_entity(&entity, "graphic/multi2.bin");
+  draw_entity(&entity);
   HAL_Delay(1000);
   fill_screen2(0xFFFF);
-  scaling_entity(&entity, 38, "graphic/multi2.bin", "multi2.bin");
-  draw_entity(&entity, entity.filePathName);
+  scaling_entity(&entity, 38);
+  draw_entity(&entity);
 
   //--------------------------------------------
 
@@ -286,11 +289,11 @@ int main(void)
   HAL_Delay(1000);
 
   fill_screen2(0xFFFF);
-  draw_entity(&entity, entity.filePathName);
+  draw_entity(&entity);
   HAL_Delay(1000);
   fill_screen2(0xFFFF);
-  scaling_entity(&entity, 0.5, entity.filePathName, "multi2.bin");
-  draw_entity(&entity, entity.filePathName);
+  scaling_entity(&entity, 0.5);
+  draw_entity(&entity);
   HAL_Delay(1000);
 
   //Test read from LCD
@@ -311,21 +314,28 @@ int main(void)
   ent.x0 = 0;
   ent.y0 = 0;
   ent.id = 0x00;
-  draw_entity(&ent, "graphic/img5.bin");
+  init_entity_sd(&ent);
+  assign_file_path_entity(&ent, "graphic/img5.bin");
+  draw_entity(&ent);
   HAL_Delay(2000);
-  draw_entity(&ent, "graphic/img6.bin");
+  assign_file_path_entity(&ent, "graphic/img6.bin");
+  draw_entity(&ent);
   HAL_Delay(2000);
-  draw_entity(&ent, "graphic/img8.bin");
+  assign_file_path_entity(&ent, "graphic/img8.bin");
+  draw_entity(&ent);
   HAL_Delay(2000);
-  draw_entity(&ent, "graphic/img9.bin");
+  assign_file_path_entity(&ent, "graphic/img9.bin");
+  draw_entity(&ent);
   HAL_Delay(2000);
   startTick = HAL_GetTick();
-  draw_entity(&ent, "graphic/img92.bin");
+  assign_file_path_entity(&ent, "graphic/img92.bin");
+  draw_entity(&ent);
   endTick = HAL_GetTick();
   getTime = endTick - startTick;
 
   fill_screen2(0x0000);
-  draw_entity(&ent, "graphic/pixel1.bin");
+  assign_file_path_entity(&ent, "graphic/pixel1.bin");
+  draw_entity(&ent);
   HAL_Delay(3000);
   //draw_entity(&ent, "graphic/img51.txt");
   //HAL_Delay(2000);
@@ -349,11 +359,14 @@ int main(void)
 
   //ENTITY entity;
 
+  free_entity_sd(&entity);
+
   entity.x0 = 0;
   entity.y0 = 0;
   entity.x1 = 64;
   entity.y1 = 64;
-  entity.color = 0xF100;
+  entity.id = 0x80;
+  entity.ST.color = 0xF100;
 
   //draw_entity(&entity,NULL);
 
@@ -372,7 +385,7 @@ int main(void)
 
   //Test_SD_Card();
 
-  play_audio_file("audio/mine.txt"); //doremi mine songita song22
+  //play_audio_file("audio/mine.txt"); //doremi mine songita song22
 
   fill_screen2(0xF100);
 

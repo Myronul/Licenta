@@ -342,7 +342,25 @@ void draw_rectangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t
 }
 
 
-void draw_entity(ENTITY *entity, char *filePathName)
+void init_entity_sd(ENTITY *entity)
+{
+	entity->x0 = 0;
+	entity->y0 = 0;
+	entity->y1 = 0;
+	entity->x1 = 0;
+
+	entity->ST.SD.filePathName = malloc(sizeof(char)*20);
+}
+
+
+void free_entity_sd(ENTITY *entity)
+{
+	free(entity->ST.SD.filePathName);
+	free(entity->ST.SD.data);
+}
+
+
+void draw_entity(ENTITY *entity)
 {
 	/*
 	 * Functie care va desena entitatea sub forma ei prima, anume
@@ -355,14 +373,25 @@ void draw_entity(ENTITY *entity, char *filePathName)
 	uint8_t *data;
 	bool flagImgDone = 0;
 
-	if((entity->id != 0) || (filePathName==NULL))
+	if(((entity->id & 1<<7) != 0))
 	{
-		/*Avem imagine monocolor sub 32x32 -> imagine nu se afla pe cardul SD!*/
+		/*Avem imagine monocolor <= 32x32 -> imagine nu se afla pe cardul SD!*/
+
+		if((entity->id & (0xC0)) == 0xC0)
+		{
+			/*
+			 * Imagine stocata local in bufferul *data din afara structurii
+			 */
+
+			LCD_send_data_multi(entity->ST.LC.data, entity->ST.LC.size);
+			return;
+
+		}
 
 		uint16_t pixelNr = (entity->x1)*(entity->y1);
 
 		uint8_t pixel[3];
-		convert_color_16_to_18(entity->color, pixel);
+		convert_color_16_to_18(entity->ST.color, pixel);
 
 		data = malloc(sizeof(pixel)*pixelNr);
 
@@ -384,7 +413,7 @@ void draw_entity(ENTITY *entity, char *filePathName)
 
 		uint16_t byteNr = 0; /*index*/
 
-		read_image_file(filePathName, entity, &byteNr, &flagImgDone);
+		read_image_file(entity, &byteNr, &flagImgDone);
 
 		set_adress_window(entity->x0, entity->y0, (entity->x1)+(entity->x0)-1, (entity->y1)+(entity->y0)-1, 'w');
 
@@ -397,8 +426,8 @@ void draw_entity(ENTITY *entity, char *filePathName)
 			 * Pentru cazul unui singur frame de transmis
 			 */
 
-			LCD_send_data_multi(entity->data, byteNr);
-			free(entity->data);
+			LCD_send_data_multi(entity->ST.SD.data, byteNr);
+			free(entity->ST.SD.data);
 			return;
 		}
 
@@ -410,7 +439,7 @@ void draw_entity(ENTITY *entity, char *filePathName)
 			flagDmaSpiTx = 0;
 
 			//LCD_send_data_multi(entity->data, byteNr);
-			HAL_SPI_Transmit_DMA(&hspi1, entity->data, byteNr);
+			HAL_SPI_Transmit_DMA(&hspi1, entity->ST.SD.data, byteNr);
 
 			do
 			{
@@ -419,18 +448,18 @@ void draw_entity(ENTITY *entity, char *filePathName)
 					break;
 				}
 
-				read_image_file(filePathName, entity, &byteNr, &flagImgDone);
+				read_image_file(entity, &byteNr, &flagImgDone);
 
 				while(flagDmaSpiTx == 0);
 				flagDmaSpiTx = 0;
-				HAL_SPI_Transmit_DMA(&hspi1, entity->data, byteNr);
+				HAL_SPI_Transmit_DMA(&hspi1, entity->ST.SD.data, byteNr);
 
 			}while(byteNr >= 3072);
 
 		}
 
 		while(flagDmaSpiTx == 0);
-		free(entity->data);
+		free(entity->ST.SD.data);
 		CS_D();
 
 	}
@@ -475,14 +504,14 @@ void translation_entity(ENTITY *const restrict entity, int16_t x, int16_t y, boo
 		if((x < (temp.x0+temp.x1)) && (x > (temp.x0)))
 		{
 			/*Pentru cazul deplasarii pe +x*/
-			draw_entity(entity, NULL);
+			draw_entity(entity);
 			draw_rectangle(temp.x0, temp.y0, x-temp.x0, temp.y1, 0xFFFF); /*Culoare background*/
 		}
 
 		if((x+temp.x1 < (temp.x0+temp.x1)) && (x+temp.x1 > temp.x0))
 		{
 			/*Pentru cazul deplasarii pe -x*/
-			draw_entity(entity, NULL);
+			draw_entity(entity);
 			draw_rectangle(temp.x0+temp.x1-(temp.x0-x), temp.y0, temp.x0-x, temp.y1, 0xFFFF); /*Culoare background*/
 		}
 
@@ -495,14 +524,14 @@ void translation_entity(ENTITY *const restrict entity, int16_t x, int16_t y, boo
 			if((y < (temp.y0+temp.y1)) && (y > (temp.y0)))
 			{
 				/*Pentru cazul deplasarii pe +y*/
-				draw_entity(entity, NULL);
+				draw_entity(entity);
 				draw_rectangle(temp.x0, temp.y0, temp.x1, y-temp.y0, 0xFFFF);
 			}
 
 			if((y+temp.y1 < (temp.y0+temp.y1)) && (y+temp.y1 > temp.y0))
 			{
 				/*Pentru cazul deplasarii pe -y*/
-				draw_entity(entity, NULL);
+				draw_entity(entity);
 				draw_rectangle(temp.x0, temp.y0+temp.y1-(temp.y0-y), temp.x1, temp.y0-y, 0xFFFF);
 			}
 
@@ -512,8 +541,8 @@ void translation_entity(ENTITY *const restrict entity, int16_t x, int16_t y, boo
 		{
 			/*Pentru orice alt caz (deplasare pe diagonala sau aleatoriu)*/
 
-			draw_entity(entity, NULL);
-			draw_entity(&temp, NULL);
+			draw_entity(entity);
+			draw_entity(&temp);
 		}
 
 
@@ -532,7 +561,7 @@ void translation_test(ENTITY *entity, uint8_t step, uint16_t delay)
 			HAL_Delay(delay);
 		}
 
-		draw_entity(entity, NULL);
+		draw_entity(entity);
 		entity->x0 = LCD_Width - entity->x1;
 
 		while((entity->y0 + entity->y1) < LCD_Length)
@@ -542,7 +571,7 @@ void translation_test(ENTITY *entity, uint8_t step, uint16_t delay)
 			HAL_Delay(delay);
 		}
 
-		draw_entity(entity, NULL);
+		draw_entity(entity);
 		entity->y0 = LCD_Length - entity->y1;
 
 		while((entity->x0 - step) > 0)
@@ -551,9 +580,9 @@ void translation_test(ENTITY *entity, uint8_t step, uint16_t delay)
 			HAL_Delay(delay);
 		}
 
-		entity->color = 0xFFFF;
-		draw_entity(entity, NULL);
-		entity->color = 0xF100;
+		entity->ST.color = 0xFFFF;
+		draw_entity(entity);
+		entity->ST.color = 0xF100;
 		entity->x0 = 0;
 
 		while((entity->y0 - step) > 0)
@@ -561,16 +590,16 @@ void translation_test(ENTITY *entity, uint8_t step, uint16_t delay)
 			translation_entity(entity, entity->x0, entity->y0-step, 1);//, color);
 			HAL_Delay(delay);
 		}
-		entity->color = 0xFFFF;
-		draw_entity(entity, NULL);
-		entity->color = 0xF100;
+		entity->ST.color = 0xFFFF;
+		draw_entity(entity);
+		entity->ST.color = 0xF100;
 		entity->y0 = 0;
 
 	}
 }
 
 
-void scaling_entity(ENTITY *entity, const float factor, char *filePathName, char *fileName)
+void scaling_entity(ENTITY *entity, const float factor)
 {
 	/*
 	 * Functie pentru scalarea unei imagini. Se vor da ca parametrii
@@ -586,6 +615,7 @@ void scaling_entity(ENTITY *entity, const float factor, char *filePathName, char
 	FRESULT res;
 	char *scalFilePath;
 	char *tempFile = "graphic/scalare/temp.bin";
+	char *fileName = return_file_name_current_path(entity->ST.SD.filePathName);
 
 	scalFilePath = assign_filePath("graphic/scalare/");
 	scalFilePath = realloc(scalFilePath, strlen(scalFilePath)+ strlen(fileName) +1 );
@@ -614,7 +644,7 @@ void scaling_entity(ENTITY *entity, const float factor, char *filePathName, char
 
 	while(!flagTerm)
 	{
-		read_image_file_scaling(filePathName, entity, factor, &x, &flagTerm);
+		read_image_file_scaling(entity->ST.SD.filePathName, entity, factor, &x, &flagTerm);
 
 		i = 0;
 		j = 0;
@@ -650,9 +680,9 @@ void scaling_entity(ENTITY *entity, const float factor, char *filePathName, char
 
 				index = ik*(entity->x1)*3 + jk*3; /*index normat la M1*/
 
-				data[k] = entity->data[index];
-				data[k+1] = entity->data[index + 1];
-				data[k+2] = entity->data[index + 2];
+				data[k] = entity->ST.SD.data[index];
+				data[k+1] = entity->ST.SD.data[index + 1];
+				data[k+2] = entity->ST.SD.data[index + 2];
 
 				j++;
 				flagPixel = 0;
@@ -699,9 +729,10 @@ void scaling_entity(ENTITY *entity, const float factor, char *filePathName, char
 
 	entity->x1=x1;
 	entity->y1=y1;
-	entity->filePathName = scalFilePath;
+	assign_file_path_entity(entity, scalFilePath);
 
 	free(data);
+	free(scalFilePath);
 	//free(entity->data);
 
 }
@@ -738,7 +769,7 @@ void rotate_entity(ENTITY *entity, int theta)
 
 	while(!flagImgDone)
 	{
-		read_image_file(entity->filePathName, entity, &byteNr, &flagImgDone);
+		read_image_file(entity, &byteNr, &flagImgDone);
 
 
 		for(int16_t k = 0; k<byteNr; k++)
@@ -757,9 +788,9 @@ void rotate_entity(ENTITY *entity, int theta)
 
 			if(flagPixel == 1)
 			{
-				pixel[0] = entity->data[k];
-				pixel[1] = entity->data[k+1];
-				pixel[2] = entity->data[k+2];
+				pixel[0] = entity->ST.SD.data[k];
+				pixel[1] = entity->ST.SD.data[k+1];
+				pixel[2] = entity->ST.SD.data[k+2];
 
 				/*Test pentru 90 de grade*/
 
@@ -778,7 +809,7 @@ void rotate_entity(ENTITY *entity, int theta)
 	}
 
 
-	free(entity->data);
+	free(entity->ST.SD.data);
 
 }
 
