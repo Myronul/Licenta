@@ -12,6 +12,8 @@
 #include "lcd.h"
 #include "font.h"
 
+extern uint16_t BackGroundColor; /*Variabila externa definit in graphic.c*/
+								 /*va tine evidenta culorii curente a backgroundului*/
 
 typedef struct ENTITY
 {

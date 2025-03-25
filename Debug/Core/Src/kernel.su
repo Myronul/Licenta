@@ -1,0 +1,3 @@
+../Core/Src/kernel.c:15:6:rtos_init	8	static
+../Core/Src/kernel.c:37:6:rtos_add_process	24	static
+../Core/Src/kernel.c:68:6:rtos_delete_process	24	static

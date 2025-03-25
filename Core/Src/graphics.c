@@ -14,6 +14,10 @@
 extern SPI_HandleTypeDef hspi1;
 volatile extern uint8_t flagDmaSpiTx;
 
+
+uint16_t BackGroundColor = 0xFFFF; /*Variabila globala pentru culoarea de fundal curenta*/
+
+
 void convert_color_16_to_18(uint16_t color, uint8_t *const pixel)
 {
 	/*
@@ -473,13 +477,10 @@ void translation_entity(ENTITY *const restrict entity, int16_t x, int16_t y, boo
 {
 	/*
 	 * Functie pentru realizarea translatiei unei imagini (entitati)
-	 * Input: Un tip de data ENTITY alaturi de noile coordonate si culoarea temporara
-	 * a entiatii (de adaugat culoarea fundalului)
+	 * Input: Referinta entitatii
+	 * 		  Noile coordonate efective (nu OFFset-uri)
+	 * 		  Modul de Step activ 1, neactiv 0 (deplasare in interiorul ferestrei initiale)
 	 * Output: Void
-	 *
-	 * Feature: De dat ca parametru numele unui fisier ce contine datele imaginii
-	 * de afisat
-	 * Momentan de rezumam la un exemplu simplu pentru a demonstra functionalitatea
 	 */
 
 
@@ -505,14 +506,14 @@ void translation_entity(ENTITY *const restrict entity, int16_t x, int16_t y, boo
 		{
 			/*Pentru cazul deplasarii pe +x*/
 			draw_entity(entity);
-			draw_rectangle(temp.x0, temp.y0, x-temp.x0, temp.y1, 0xFFFF); /*Culoare background*/
+			draw_rectangle(temp.x0, temp.y0, x-temp.x0, temp.y1, BackGroundColor); /*Culoare background*/
 		}
 
 		if((x+temp.x1 < (temp.x0+temp.x1)) && (x+temp.x1 > temp.x0))
 		{
 			/*Pentru cazul deplasarii pe -x*/
 			draw_entity(entity);
-			draw_rectangle(temp.x0+temp.x1-(temp.x0-x), temp.y0, temp.x0-x, temp.y1, 0xFFFF); /*Culoare background*/
+			draw_rectangle(temp.x0+temp.x1-(temp.x0-x), temp.y0, temp.x0-x, temp.y1, BackGroundColor); /*Culoare background*/
 		}
 
 	}
@@ -525,14 +526,14 @@ void translation_entity(ENTITY *const restrict entity, int16_t x, int16_t y, boo
 			{
 				/*Pentru cazul deplasarii pe +y*/
 				draw_entity(entity);
-				draw_rectangle(temp.x0, temp.y0, temp.x1, y-temp.y0, 0xFFFF);
+				draw_rectangle(temp.x0, temp.y0, temp.x1, y-temp.y0, BackGroundColor);
 			}
 
 			if((y+temp.y1 < (temp.y0+temp.y1)) && (y+temp.y1 > temp.y0))
 			{
 				/*Pentru cazul deplasarii pe -y*/
 				draw_entity(entity);
-				draw_rectangle(temp.x0, temp.y0+temp.y1-(temp.y0-y), temp.x1, temp.y0-y, 0xFFFF);
+				draw_rectangle(temp.x0, temp.y0+temp.y1-(temp.y0-y), temp.x1, temp.y0-y, BackGroundColor);
 			}
 
 		}
@@ -542,7 +543,7 @@ void translation_entity(ENTITY *const restrict entity, int16_t x, int16_t y, boo
 			/*Pentru orice alt caz (deplasare pe diagonala sau aleatoriu)*/
 
 			draw_entity(entity);
-			draw_entity(&temp);
+			draw_rectangle(temp.x0, temp.y0, temp.x1, temp.y1, BackGroundColor);
 		}
 
 
@@ -606,6 +607,9 @@ void scaling_entity(ENTITY *entity, const float factor)
 	 * o referinta catre entitatea de scalat si factorul asociat
 	 */
 
+	/*Vom elimina din sfera vizuala imaginea de scalat*/
+
+	draw_rectangle(entity->x0, entity->y0, entity->x1, entity->y1, BackGroundColor);
 
 	/*
 	 * Initial vom afla noile marimi pentru imaginea
@@ -748,6 +752,11 @@ void rotate_entity(ENTITY *entity, int theta)
 	 * Input: referinta catre entitate, unghiul de rotatie
 	 * Output: Void
 	 */
+
+
+	/*Vom elimina din campul vizual imaginea curenta*/
+
+	draw_rectangle(entity->x0, entity->y0, entity->x1, entity->y1, BackGroundColor);
 
 	/*Aflam initial coordonatele pivotului de referinta*/
 

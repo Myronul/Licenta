@@ -62,6 +62,7 @@ DMA_HandleTypeDef hdma_dac1;
 SD_HandleTypeDef hsd;
 
 SPI_HandleTypeDef hspi1;
+SPI_HandleTypeDef hspi2;
 DMA_HandleTypeDef hdma_spi1_tx;
 DMA_HandleTypeDef hdma_spi1_rx;
 
@@ -74,11 +75,13 @@ UART_HandleTypeDef huart1;
 volatile uint8_t flagDmaSpiTx = 0; /*flaguri pentru transfer DMA prin SPI*/
 volatile uint8_t flagDmaSpiRx = 0;
 
+volatile uint8_t flagDmaSDIORx = 0; /*flag pentru transfer DMA SDIO*/
+
 volatile bool flagDmaDAC = 0;      /*Flag pentru DMA pe DAC si bufferele aferente*/
 
 /*Variabile pentru controller*/
 
-volatile uint8_t dataController;
+uint8_t dataController = 0;
 uint8_t currentDx = 0;
 
 
@@ -93,6 +96,7 @@ static void MX_USART1_UART_Init(void);
 static void MX_DAC_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_SDIO_SD_Init(void);
+static void MX_SPI2_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -167,6 +171,10 @@ void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi)
 		  	  break;
 		}
 
+		/*Reinitializare intrerupere rcpt SPI2 intr Controller*/
+
+		HAL_SPI_Receive_IT(&hspi2, &dataController, sizeof(dataController));
+
 	}
 
 }
@@ -222,12 +230,13 @@ int main(void)
   MX_TIM2_Init();
   MX_SDIO_SD_Init();
   MX_FATFS_Init();
+  MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
 
   init_cardSD();  /*Initializare sistem de fisiere card SD*/
   ILI9488_driver_init();  /*Initializare driver ecran LCD*/
   HAL_TIM_Base_Start(&htim2); /*Initializare timer2 pentru trigger DMA pe DAC*/
-
+  HAL_SPI_Receive_IT(&hspi2, &dataController, sizeof(dataController)); /*Initializare SPI2 intr Controller*/
 
   /*Test pentru tastatura*/
 
@@ -265,20 +274,24 @@ int main(void)
 
   fill_screen2(0xFFFF);
 
+  BackGroundColor = 0xFFFF;
+
   entity.x0 = 100;
   entity.y0 = 100;
   entity.id = 0;
   assign_file_path_entity(&entity, "graphic/multi2.bin");
   draw_entity(&entity);
   HAL_Delay(1000);
-  fill_screen2(0xFFFF);
+  //fill_screen2(0xFFFF);
   scaling_entity(&entity, 38);
+  HAL_Delay(1000);
+  draw_rectangle(entity.x0, entity.y0, entity.x1, entity.y1, BackGroundColor);
   draw_entity(&entity);
 
   //--------------------------------------------
 
   HAL_Delay(1000);
-  fill_screen2(0xFFFF);
+  //fill_screen2(0xFFFF);
 
   rotate_entity(&entity, 90);
 
@@ -288,11 +301,14 @@ int main(void)
 
   HAL_Delay(1000);
 
-  fill_screen2(0xFFFF);
+  //fill_screen2(0xFFFF);
+  draw_rectangle(entity.x0, entity.y0, entity.x1, entity.y1, BackGroundColor);
   draw_entity(&entity);
   HAL_Delay(1000);
-  fill_screen2(0xFFFF);
+  //fill_screen2(0xFFFF);
   scaling_entity(&entity, 0.5);
+  HAL_Delay(1000);
+  draw_rectangle(entity.x0, entity.y0, entity.x1, entity.y1, BackGroundColor);
   draw_entity(&entity);
   HAL_Delay(1000);
 
@@ -373,13 +389,13 @@ int main(void)
   //translation_test(&entity, 1, 0);
 
   HAL_Delay(500);
-  translation_entity(&entity, entity.x0+100, entity.y0+100, 1);//, 0xF100);
+  translation_entity(&entity, entity.x0+100, entity.y0+100, 0);//, 0xF100);
   HAL_Delay(2000);
-  translation_entity(&entity, entity.x0+32, entity.y0+32, 1);//, 0xF100);
+  translation_entity(&entity, entity.x0+32, entity.y0+32, 0);//, 0xF100);
   HAL_Delay(500);
-  translation_entity(&entity, entity.x0+12, entity.y0+32, 1);//, 0xF100);
+  translation_entity(&entity, entity.x0+12, entity.y0+32, 0);//, 0xF100);
   HAL_Delay(500);
-  translation_entity(&entity, entity.x0+12, entity.y0, 1);//, 0xF100);
+  translation_entity(&entity, entity.x0+12, entity.y0, 0);//, 0xF100);
   HAL_Delay(500);
 
 
@@ -664,6 +680,44 @@ static void MX_SPI1_Init(void)
 }
 
 /**
+  * @brief SPI2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_SPI2_Init(void)
+{
+
+  /* USER CODE BEGIN SPI2_Init 0 */
+
+  /* USER CODE END SPI2_Init 0 */
+
+  /* USER CODE BEGIN SPI2_Init 1 */
+
+  /* USER CODE END SPI2_Init 1 */
+  /* SPI2 parameter configuration*/
+  hspi2.Instance = SPI2;
+  hspi2.Init.Mode = SPI_MODE_MASTER;
+  hspi2.Init.Direction = SPI_DIRECTION_1LINE;
+  hspi2.Init.DataSize = SPI_DATASIZE_8BIT;
+  hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
+  hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;
+  hspi2.Init.NSS = SPI_NSS_SOFT;
+  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
+  hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
+  hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
+  hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+  hspi2.Init.CRCPolynomial = 10;
+  if (HAL_SPI_Init(&hspi2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN SPI2_Init 2 */
+
+  /* USER CODE END SPI2_Init 2 */
+
+}
+
+/**
   * @brief TIM2 Initialization Function
   * @param None
   * @retval None
@@ -682,9 +736,9 @@ static void MX_TIM2_Init(void)
 
   /* USER CODE END TIM2_Init 1 */
   htim2.Instance = TIM2;
-  htim2.Init.Prescaler = 83;//83
+  htim2.Init.Prescaler = 41;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 11;//11
+  htim2.Init.Period = 27;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
@@ -777,8 +831,9 @@ static void MX_GPIO_Init(void)
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOH_CLK_ENABLE();
-  __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
