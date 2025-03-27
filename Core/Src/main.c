@@ -27,6 +27,7 @@
 #include "lcd.h"
 #include "sdsys.h"
 #include "audio.h"
+#include "kernel.h"
 #include <stdbool.h>
 
 /* USER CODE END Includes */
@@ -67,6 +68,7 @@ DMA_HandleTypeDef hdma_spi1_tx;
 DMA_HandleTypeDef hdma_spi1_rx;
 
 TIM_HandleTypeDef htim2;
+TIM_HandleTypeDef htim4;
 
 UART_HandleTypeDef huart1;
 
@@ -97,6 +99,7 @@ static void MX_DAC_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_SDIO_SD_Init(void);
 static void MX_SPI2_Init(void);
+static void MX_TIM4_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -190,6 +193,41 @@ void HAL_DAC_ConvHalfCpltCallbackCh1(DAC_HandleTypeDef *hdac)
 
 }
 
+unsigned int timp = 0;
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+    if (htim->Instance == TIM4)
+    {
+
+        timp = (timp+1)%50;
+
+        if(timp == 0)
+        {
+        	/*realizam comutarea de context*/
+        }
+
+    }
+}
+
+extern TCB *prim;
+
+void process1(void)
+{
+	while(1)
+	{
+		fill_screen2(0xFFFF);
+	}
+}
+
+
+void process2(void)
+{
+	while(1)
+	{
+		fill_screen2(0xF100);
+	}
+}
 
 
 /* USER CODE END 0 */
@@ -231,6 +269,7 @@ int main(void)
   MX_SDIO_SD_Init();
   MX_FATFS_Init();
   MX_SPI2_Init();
+  MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
 
   init_cardSD();  /*Initializare sistem de fisiere card SD*/
@@ -238,6 +277,12 @@ int main(void)
   HAL_TIM_Base_Start(&htim2); /*Initializare timer2 pentru trigger DMA pe DAC*/
   HAL_SPI_Receive_IT(&hspi2, &dataController, sizeof(dataController)); /*Initializare SPI2 intr Controller*/
 
+  rtos_init();
+  rtos_add_process(process1);
+  rtos_add_process(process2);
+  rtos_scheduler(1);
+  HAL_TIM_Base_Start(&htim4);
+  process1();
   /*Test pentru tastatura*/
 
   fill_screen1(0x0000);
@@ -759,6 +804,51 @@ static void MX_TIM2_Init(void)
   /* USER CODE BEGIN TIM2_Init 2 */
 
   /* USER CODE END TIM2_Init 2 */
+
+}
+
+/**
+  * @brief TIM4 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM4_Init(void)
+{
+
+  /* USER CODE BEGIN TIM4_Init 0 */
+
+  /* USER CODE END TIM4_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM4_Init 1 */
+
+  /* USER CODE END TIM4_Init 1 */
+  htim4.Instance = TIM4;
+  htim4.Init.Prescaler = 84;
+  htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim4.Init.Period = 20000;
+  htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim4) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim4, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim4, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM4_Init 2 */
+
+  /* USER CODE END TIM4_Init 2 */
 
 }
 

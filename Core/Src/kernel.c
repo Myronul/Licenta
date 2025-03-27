@@ -6,13 +6,15 @@
  */
 
 #include "kernel.h"
-
+#include "stm32f4xx_hal.h"
 
 static uint8_t currentPID = 0;
 TCB *prim; /*Referinta de baza pentru LSI a proceselor*/
 		   /*Procesul cu PID-ul 0 este root-ul*/
 
-void rtos_init()
+TCB *activeProcess;
+
+void rtos_init(void)
 {
 	/*
 	 * Functie de initializare a kernelului.
@@ -29,6 +31,13 @@ void rtos_init()
 
 	prim->pid = currentPID++;
 	prim->pnext = NULL;
+
+	/*Vom intra in modul user thread al procesorului privilegiat*/
+
+	__set_CONTROL(__get_CONTROL() | 0x2);
+	__ISB();
+
+
 
 
 }
@@ -99,6 +108,105 @@ void rtos_delete_process(uint8_t processID)
 
 
 }
+
+
+inline void rtos_save_context(TCB *process)
+{
+	/*
+	 * Functie inline pentru salvarea contextului a procesului
+	 * curent la aparitia unei intreruperi.
+	 * Functia va fi apelata doar in cadrul unui ISR.
+	 * Input: Referinta catre procesul curent de salvat
+	 * Output: Void
+	 */
+
+    __asm volatile(
+        "MRS R0, MSP \n"
+        "MRS R1, PSP \n"
+        "MOV SP, R1 \n"
+        "PUSH {R4-R11} \n"
+        "MOV SP, R0 \n"
+        :
+        :
+    );
+
+    __asm volatile(
+        "MRS %0, PSP"
+        : "=r" (process->stackPointer)
+    );
+
+
+    process->state = BLOCKED;
+
+
+}
+
+inline void rtos_restore_context(TCB *process)
+{
+	/*
+	 * Functie inline pentru restaurarea contextului procesului
+	 * curent la aparitia unei intreruperi.
+	 * Functia va fi apelata doar in cadrul unui ISR.
+	 * Input: Referinta catre procesul curent de restaurat
+	 * Output: Void
+	 */
+
+	 __asm volatile(
+	        "MRS R0, %0 \n"
+	        "MOV PSP, R0 \n"
+	        "POP {R4-R11} \n"
+	        "BX 0xFFFFFFFD \n"
+	        :
+	        : "r" (process->stackPointer)
+	    );
+
+	 /*Se va face HW unstacking automat pentru:
+	  * pc,lr,r12,r3-r0,xpsr */
+
+	 process->state = RUNNING;
+
+
+}
+
+
+void rtos_scheduler(uint8_t processID)
+{
+	if(processID == 0)
+	{
+		return;
+	}
+
+	TCB *temp = prim;
+
+	while((temp!=NULL))
+	{
+		if(processID == temp->pid)
+		{
+			activeProcess = temp;
+			break;
+		}
+
+		else
+		{
+			temp = temp->pnext;
+		}
+
+	}
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
