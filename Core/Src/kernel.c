@@ -43,6 +43,7 @@ void rtos_init(void)
 }
 
 
+
 void rtos_add_process(void (*function)(void))
 {
 	/*
@@ -63,10 +64,32 @@ void rtos_add_process(void (*function)(void))
 
 	q->pid = currentPID++;
 	q->processFunction = function;
-	q->stackPointer = &(q->stack[STACK_SIZE-1]);
 	q->state = BLOCKED;
 
-	/*Adaugam noul proces in lista dinamica*/
+	uint32_t *stackTop = &(q->stack[STACK_SIZE-1]);
+
+	*(--stackTop) = 0x01000000;			/*xPSR*/
+	*(--stackTop) = (uint32_t)function; /*PC*/
+	*(--stackTop) = 0xFFFFFFFD;			/*LR*/
+	*(--stackTop) = 0;					/*R12*/
+	*(--stackTop) = 0;					/*R3*/
+	*(--stackTop) = 0;					/*R2*/
+	*(--stackTop) = 0;					/*R1*/
+	*(--stackTop) = 0;					/*R0*/
+
+	*(--stackTop) = 0;					/*R11*/
+	*(--stackTop) = 0;					/*R10*/
+	*(--stackTop) = 0;					/*R9*/
+	*(--stackTop) = 0;					/*R8*/
+	*(--stackTop) = 0;					/*R7*/
+	*(--stackTop) = 0;					/*R6*/
+	*(--stackTop) = 0;					/*R5*/
+	*(--stackTop) = 0;					/*R4*/
+
+
+	q->stackPointer = stackTop;
+
+	/*Adaugam noul proces in TCB*/
 
 	q->pnext = prim;
 	prim = q;
@@ -121,19 +144,14 @@ inline void rtos_save_context(TCB *process)
 	 */
 
     __asm volatile(
-        "MRS R0, MSP \n"
-        "MRS R1, PSP \n"
-        "MOV SP, R1 \n"
-        "PUSH {R4-R11} \n"
-        "MOV SP, R0 \n"
+        "MRS R0, PSP \n"
+        "STMDB R0!, {R4-R11} \n"
+        "STR R0, %0 \n"
+        : "=m" (process->stackPointer)
         :
-        :
+        : "memory"
     );
 
-    __asm volatile(
-        "MRS %0, PSP"
-        : "=r" (process->stackPointer)
-    );
 
 
     process->state = BLOCKED;
@@ -151,14 +169,17 @@ inline void rtos_restore_context(TCB *process)
 	 * Output: Void
 	 */
 
-	 __asm volatile(
-	        "MRS R0, %0 \n"
-	        "MOV PSP, R0 \n"
-	        "POP {R4-R11} \n"
-	        "BX 0xFFFFFFFD \n"
-	        :
-	        : "r" (process->stackPointer)
-	    );
+    __asm volatile(
+        "LDR R0, %0 \n"
+        "MSR PSP, R0 \n"
+        "LDMIA R0!, {R4-R11} \n"
+    	"MOV LR, 0xFFFFFFFD \n"
+        "BX LR \n"
+        :
+        : "m" (process->stackPointer)
+        : "memory"
+    );
+
 
 	 /*Se va face HW unstacking automat pentru:
 	  * pc,lr,r12,r3-r0,xpsr */

@@ -1,4 +1,6 @@
 ../Core/Src/kernel.c:17:6:rtos_init	16	static,ignoring_inline_asm
-../Core/Src/kernel.c:46:6:rtos_add_process	24	static
-../Core/Src/kernel.c:77:6:rtos_delete_process	24	static
-../Core/Src/kernel.c:172:6:rtos_scheduler	24	static
+../Core/Src/kernel.c:47:6:rtos_add_process	24	static
+../Core/Src/kernel.c:100:6:rtos_delete_process	24	static
+../Core/Src/kernel.c:136:13:rtos_save_context	16	static,ignoring_inline_asm
+../Core/Src/kernel.c:162:13:rtos_restore_context	16	static,ignoring_inline_asm
+../Core/Src/kernel.c:193:6:rtos_scheduler	24	static

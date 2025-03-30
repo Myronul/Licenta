@@ -194,6 +194,9 @@ void HAL_DAC_ConvHalfCpltCallbackCh1(DAC_HandleTypeDef *hdac)
 }
 
 unsigned int timp = 0;
+int k = 0;
+
+extern TCB *activeProcess;
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
@@ -205,6 +208,24 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         if(timp == 0)
         {
         	/*realizam comutarea de context*/
+
+        	rtos_save_context(activeProcess);
+
+        	if(k==0)
+        	{
+        		rtos_scheduler(2);
+        	}
+
+        	else
+        	{
+        		rtos_scheduler(1);
+        	}
+
+        	k = (k+1)%2;
+
+
+        	rtos_restore_context(activeProcess);
+
         }
 
     }
@@ -275,13 +296,12 @@ int main(void)
   init_cardSD();  /*Initializare sistem de fisiere card SD*/
   ILI9488_driver_init();  /*Initializare driver ecran LCD*/
   HAL_TIM_Base_Start(&htim2); /*Initializare timer2 pentru trigger DMA pe DAC*/
+  HAL_TIM_Base_Start(&htim4);
   HAL_SPI_Receive_IT(&hspi2, &dataController, sizeof(dataController)); /*Initializare SPI2 intr Controller*/
 
   rtos_init();
   rtos_add_process(process1);
   rtos_add_process(process2);
-  rtos_scheduler(1);
-  HAL_TIM_Base_Start(&htim4);
   process1();
   /*Test pentru tastatura*/
 

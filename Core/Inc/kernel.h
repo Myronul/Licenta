@@ -49,9 +49,10 @@ typedef struct TCB
 void rtos_init(void);
 void rtos_add_process(void (*function)(void));
 void rtos_delete_process(uint8_t processID);
-inline void rtos_save_context(TCB *process);
-inline void rtos_restore_context(TCB *process);
+void rtos_save_context(TCB *process);
+void rtos_restore_context(TCB *process);
 void rtos_scheduler(uint8_t processID);
+
 
 
 #endif /* INC_KERNEL_H_ */
