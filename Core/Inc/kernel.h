@@ -10,49 +10,18 @@
 
 /*
  * Biblioteca pentru kernelul minimalist.
- * Se va defini o dimensiune generala a stivei oricarui proces,
- * un enum pentru posibilele stari si o structura definitorie tip TCB
- * cu un id specific, state-ul, pointer curent catre stiva si pointer catre
- * functia asociata procesului
- * Functia de contex switching se afla in context.s
+ * Se va defini o dimensiune generală a stivei oricărui proces,
+ * un enum pentru posibilele stări și o structură definitorie tip TCB
+ * cu un id specific, state-ul, pointer curent către stivă și pointer către
+ * funcția asociată procesului
  */
 
-#define STACK_SIZE 512 /*512*4 = 2048 kB Stack*/
-
+#include "stm32f4xx_hal.h"
 #include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
 
-typedef enum
-{
-	RUNNING, /*0*/
-	READY,	 /*1*/
-	BLOCKED  /*2*/
-
-}STATE;
-
-
-
-typedef struct TCB
-{
-	uint8_t pid;
-	STATE state;
-	uint32_t stack[STACK_SIZE];
-	uint32_t *stackPointer;
-	void (*processFunction)(void);
-
-	struct TCB *pnext;
-
-
-}TCB;
-
-void rtos_init(void);
-void rtos_add_process(void (*function)(void));
-void rtos_delete_process(uint8_t processID);
-void rtos_save_context(TCB *process);
-void rtos_restore_context(TCB *process);
-void rtos_scheduler(uint8_t processID);
-
-
+__attribute__((naked))void LaunchScheduler(void);
+void OsInitThreadStack();
+volatile void Task0();
+volatile void Task1();
 
 #endif /* INC_KERNEL_H_ */

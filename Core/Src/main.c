@@ -86,6 +86,10 @@ volatile bool flagDmaDAC = 0;      /*Flag pentru DMA pe DAC si bufferele aferent
 uint8_t dataController = 0;
 uint8_t currentDx = 0;
 
+/*mutex*/
+
+uint8_t startOS = 0;
+
 
 /* USER CODE END PV */
 
@@ -193,61 +197,21 @@ void HAL_DAC_ConvHalfCpltCallbackCh1(DAC_HandleTypeDef *hdac)
 
 }
 
-unsigned int timp = 0;
-int k = 0;
-
-extern TCB *activeProcess;
+unsigned int k = 0;
+extern int mutex;
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
     if (htim->Instance == TIM4)
     {
 
-        timp = (timp+1)%50;
+    	k = (k+1)%50;
 
-        if(timp == 0)
-        {
-        	/*realizam comutarea de context*/
-
-        	rtos_save_context(activeProcess);
-
-        	if(k==0)
-        	{
-        		rtos_scheduler(2);
-        	}
-
-        	else
-        	{
-        		rtos_scheduler(1);
-        	}
-
-        	k = (k+1)%2;
-
-
-        	rtos_restore_context(activeProcess);
-
-        }
-
+    	if(startOS == 1 && mutex==0)
+    	{
+    		SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
+    	}
     }
-}
-
-extern TCB *prim;
-
-void process1(void)
-{
-	while(1)
-	{
-		fill_screen2(0xFFFF);
-	}
-}
-
-
-void process2(void)
-{
-	while(1)
-	{
-		fill_screen2(0xF100);
-	}
 }
 
 
@@ -270,7 +234,8 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
+  HAL_NVIC_SetPriority(PendSV_IRQn, 15, 0);
+  //HAL_NVIC_SetPriority(TIM4_IRQn, 14, 0);
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -296,16 +261,21 @@ int main(void)
   init_cardSD();  /*Initializare sistem de fisiere card SD*/
   ILI9488_driver_init();  /*Initializare driver ecran LCD*/
   HAL_TIM_Base_Start(&htim2); /*Initializare timer2 pentru trigger DMA pe DAC*/
-  HAL_TIM_Base_Start(&htim4);
+  HAL_TIM_Base_Start_IT(&htim4);
   HAL_SPI_Receive_IT(&hspi2, &dataController, sizeof(dataController)); /*Initializare SPI2 intr Controller*/
 
-  rtos_init();
-  rtos_add_process(process1);
-  rtos_add_process(process2);
-  process1();
+  OsInitThreadStack();
+  LaunchScheduler();
+
+  while(1)
+  {
+
+  }
+
+
   /*Test pentru tastatura*/
 
-  fill_screen1(0x0000);
+  //fill_screen1(0x0000);
 
   //HAL_Delay(1000);
   //play_audio_file("Audio/acoustic.txt");
@@ -377,6 +347,19 @@ int main(void)
   draw_entity(&entity);
   HAL_Delay(1000);
 
+  fill_screen2(0xFFFF);
+  entity.x0 = 0;
+  entity.y0 = 0;
+  assign_file_path_entity(&entity, "graphic/img8.bin");
+  draw_entity(&entity);
+  HAL_Delay(1000);
+  fill_screen2(0xFFFF);
+  scaling_entity(&entity, 0.5);
+  draw_entity(&entity);
+  HAL_Delay(1000);
+  scaling_entity(&entity, 2);
+  draw_entity(&entity);
+  HAL_Delay(1000);
   //Test read from LCD
 
   //draw_pixel(0,0,0x001F);
@@ -451,7 +434,7 @@ int main(void)
 
   //draw_entity(&entity,NULL);
 
-  //translation_test(&entity, 1, 0);
+  translation_test(&entity, 1, 0);
 
   HAL_Delay(500);
   translation_entity(&entity, entity.x0+100, entity.y0+100, 0);//, 0xF100);
@@ -940,6 +923,7 @@ static void MX_GPIO_Init(void)
 /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOE_CLK_ENABLE();
   __HAL_RCC_GPIOH_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
@@ -947,7 +931,17 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOE, GPIO_PIN_4, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_6, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin : PE4 */
+  GPIO_InitStruct.Pin = GPIO_PIN_4;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PD3 PD4 PD6 */
   GPIO_InitStruct.Pin = GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_6;

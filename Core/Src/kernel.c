@@ -6,229 +6,205 @@
  */
 
 #include "kernel.h"
-#include "stm32f4xx_hal.h"
+#include <stdint.h>
+#include <stdbool.h>
+#include "graphics.h"
 
-static uint8_t currentPID = 0;
-TCB *prim; /*Referinta de baza pentru LSI a proceselor*/
-		   /*Procesul cu PID-ul 0 este root-ul*/
 
-TCB *activeProcess;
+#define NUM_OF_THREADS  2
 
-void rtos_init(void)
+int mutex = 0;
+
+extern uint8_t startOS;
+
+/// Task control block, implemented as a linked list to point to the
+/// TCB of the next task.
+struct tcb{
+  int32_t    *stackPt;
+  struct tcb *nextPt;
+};
+/// Define tcb_t datatype
+typedef struct tcb tcb_t;
+/// Define an array to store TCB's for the tasks.
+tcb_t tcbs[NUM_OF_THREADS];
+/// Points to the TCB of the currently active task
+tcb_t *pCurntTcb;
+
+
+#define STACKSIZE       250
+/// Define stack for each task. Node that the processor expects the stacks
+/// to be ended on word boundaries.
+int32_t TCB_STACK[NUM_OF_THREADS][STACKSIZE];
+
+
+__attribute__((naked)) void PendSV_Handler(void)
 {
-	/*
-	 * Functie de initializare a kernelului.
-	 * Alocarea memoriei pentru primul proces
-	 * Vom avea o LSI cu procesele curente
-	 */
+	/// STEP 1 - SAVE THE CURRENT TASK CONTEXT
 
-	prim = (TCB*)malloc(sizeof(TCB));
+	/// At this point the processor has already pushed PSR, PC, LR, R12, R3, R2, R1 and R0
+	/// onto the stack. We need to push the rest(i.e R4, R5, R6, R7, R8, R9, R10 & R11) to save the
+	/// context of the current task.
+	/// Disable interrupts
+    __asm("CPSID   I");
+    /// Push registers R4 to R7
+    __asm("PUSH    {R4-R7}");
+    /// Push registers R8-R11
+    __asm("MOV     R4, R8");
+    __asm("MOV     R5, R9");
+    __asm("MOV     R6, R10");
+    __asm("MOV     R7, R11");
+    __asm("PUSH    {R4-R7}");
+    /// Load R0 with the address of pCurntTcb
+    __asm("LDR     R0, =pCurntTcb");
+    /// Load R1 with the content of pCurntTcb(i.e post this, R1 will contain the address of current TCB).
+    __asm("LDR     R1, [R0]");
+    /// Move the SP value to R4
+    __asm("MOV     R4, SP");
+    /// Store the value of the stack pointer(copied in R4) to the current tasks "stackPt" element in its TCB.
+    /// This marks an end to saving the context of the current task.
+    __asm("STR     R4, [R1]");
 
-	if(prim == NULL)
-	{
-		return;
-	}
 
-	prim->pid = currentPID++;
-	prim->pnext = NULL;
+    /// STEP 2: LOAD THE NEW TASK CONTEXT FROM ITS STACK TO THE CPU REGISTERS, UPDATE pCurntTcb.
 
-	/*Vom intra in modul user thread al procesorului privilegiat*/
+    /// Load the address of the next task TCB onto the R1.
+    __asm("LDR     R1, [R1,#4]");
+    /// Load the contents of the next tasks stack pointer to pCurntTcb, equivalent to pointing pCurntTcb to
+    /// the newer tasks TCB. Remember R1 contains the address of pCurntTcb.
+    __asm("STR     R1, [R0]");
+    /// Load the newer tasks TCB to the SP using R4.
+    __asm("LDR     R4, [R1]");
+    __asm("MOV     SP, R4");
+    /// Pop registers R8-R11
+    __asm("POP     {R4-R7}");
+    __asm("MOV     R8, R4");
+    __asm("MOV     R9, R5");
+    __asm("MOV     R10, R6");
+    __asm("MOV     R11, R7");
+    /// Pop registers R4-R7
+    __asm("POP     {R4-R7}");
+    __asm("CPSIE   I ");
+    __asm("BX      LR");
+}
 
-	__set_CONTROL(__get_CONTROL() | 0x2);
-	__ISB();
+void OsInitThreadStack()
+{
+	/// Enter critical section
+	/// Disable interrupts
+	__asm("CPSID   I");
+	/// Make the TCB linked list circular
+	tcbs[0].nextPt = &tcbs[1];
+	tcbs[1].nextPt = &tcbs[0];
+
+	/// Setup stack for task0
+
+	/// Setup the stack such that it is holding one task context.
+	/// Remember it is a descending stack and a context consists of 16 registers.
+	tcbs[0].stackPt = &TCB_STACK[0][STACKSIZE-16];
+	/// Set the 'T' bit in stacked xPSR to '1' to notify processor
+	/// on exception return about the thumb state. V6-m and V7-m cores
+	/// can only support thumb state hence this should be always set
+	/// to '1'.
+	TCB_STACK[0][STACKSIZE-1] = 0x01000000;
+	/// Set the stacked PC to point to the task
+	TCB_STACK[0][STACKSIZE-2] = (int32_t)(Task0);
 
 
+	/// Setup stack for task1
 
+	/// Setup the stack such that it is holding one task context.
+	/// Remember it is a descending stack and a context consists of 16 registers.
+    tcbs[1].stackPt = &TCB_STACK[1][STACKSIZE-16];
+    /// Set the 'T' bit in stacked xPSR to '1' to notify processor
+    /// on exception return about the thumb state. V6-m and V7-m cores
+    /// can only support thumb state hence this should be always set
+    /// to '1'.
+    TCB_STACK[1][STACKSIZE-1] = 0x01000000;
+    /// Set the stacked PC to point to the task
+    TCB_STACK[1][STACKSIZE-2] = (int32_t)(Task1);
+    /// Make current tcb pointer point to task0
+    pCurntTcb = &tcbs[0];
+    /// Enable interrupts
+    __asm("CPSIE   I ");
+}
+
+
+__attribute__((naked)) void LaunchScheduler(void)
+{
+	__asm("CPSID   I");
+	__asm("LDR R0, =startOS");
+	__asm("MOV R1, 1");
+	__asm("STR R1, [R0]");
+    /// R0 contains the address of currentPt
+    __asm("LDR     R0, =pCurntTcb");
+    /// R2 contains the address in currentPt(value of currentPt)
+    __asm("LDR     R2, [R0]");
+    /// Load the SP reg with the stacked SP value
+    __asm("LDR     R4, [R2]");
+    __asm("MOV     SP, R4");
+    /// Pop registers R8-R11(user saved context)
+    __asm("POP     {R4-R7}");
+    __asm("MOV     R8, R4");
+    __asm("MOV     R9, R5");
+    __asm("MOV     R10, R6");
+    __asm("MOV     R11, R7");
+    /// Pop registers R4-R7(user saved context)
+    __asm("POP     {R4-R7}");
+    ///  Start poping the stacked exception frame.
+    __asm("POP     {R0-R3}");
+    __asm("POP     {R4}");
+    __asm("MOV     R12, R4");
+    /// Skip the saved LR
+    __asm("ADD     SP,SP,#4");
+    /// POP the saved PC into LR via R4, We do this to jump into the
+    /// first task when we execute the branch instruction to exit this routine.
+    __asm("POP     {R4}");
+    __asm("MOV     LR, R4");
+    __asm("ADD     SP,SP,#4");
+    /// Enable interrupts
+    __asm("CPSIE   I ");
+    __asm("BX      LR");
 
 }
 
 
-
-void rtos_add_process(void (*function)(void))
+void portable_delay_cycles(unsigned long n)
 {
-	/*
-	 * Functie pentru adaugarea unui nou proces
-	 * in LSI asociat kernelului rtos
-	 * Input: adresa functiei asociate procesului
-	 * Output: void
-	 */
-
-	/*Asociem parametrii noului proces*/
-
-	TCB *q = (TCB*)malloc(sizeof(TCB));
-
-	if(q == NULL)
-	{
-		return;
-	}
-
-	q->pid = currentPID++;
-	q->processFunction = function;
-	q->state = BLOCKED;
-
-	uint32_t *stackTop = &(q->stack[STACK_SIZE-1]);
-
-	*(--stackTop) = 0x01000000;			/*xPSR*/
-	*(--stackTop) = (uint32_t)function; /*PC*/
-	*(--stackTop) = 0xFFFFFFFD;			/*LR*/
-	*(--stackTop) = 0;					/*R12*/
-	*(--stackTop) = 0;					/*R3*/
-	*(--stackTop) = 0;					/*R2*/
-	*(--stackTop) = 0;					/*R1*/
-	*(--stackTop) = 0;					/*R0*/
-
-	*(--stackTop) = 0;					/*R11*/
-	*(--stackTop) = 0;					/*R10*/
-	*(--stackTop) = 0;					/*R9*/
-	*(--stackTop) = 0;					/*R8*/
-	*(--stackTop) = 0;					/*R7*/
-	*(--stackTop) = 0;					/*R6*/
-	*(--stackTop) = 0;					/*R5*/
-	*(--stackTop) = 0;					/*R4*/
-
-
-	q->stackPointer = stackTop;
-
-	/*Adaugam noul proces in TCB*/
-
-	q->pnext = prim;
-	prim = q;
-
+ 	while (n--)
+ 	{
+ 		asm volatile ("");
+ 	}
 }
 
-
-void rtos_delete_process(uint8_t processID)
+volatile void Task0()
 {
-	/*
-	 * Functie pentru stergerea unui proces.
-	 * Vom sterge direct la procesul din ordinea aferenta PID
-	 * Input: PID-ul procesului de sters
-	 * Output: Void
-	 */
-
-	if(processID == 0)
-	{
-		return;
-	}
-
-	TCB *temp = prim;
-
-	while((temp!=NULL) && ((processID-1)!=0))
-	{
-		temp = temp->pnext;
-		processID--;
-	}
+    while(1)
+    {
 
 
-	/*
-	 * Stergem dupa temp
-	 */
+    	//HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_4);
+    	mutex = 1;
+    	HAL_GPIO_WritePin(GPIOE, GPIO_PIN_4, GPIO_PIN_SET);
+       fill_screen1(0x0000);
+       mutex = 0;
+       HAL_Delay(20);
 
-	TCB *q = temp->pnext;
-
-	temp->pnext = q->pnext;
-	free(q);
-
-
+    }
 }
 
-
-inline void rtos_save_context(TCB *process)
+volatile void Task1()
 {
-	/*
-	 * Functie inline pentru salvarea contextului a procesului
-	 * curent la aparitia unei intreruperi.
-	 * Functia va fi apelata doar in cadrul unui ISR.
-	 * Input: Referinta catre procesul curent de salvat
-	 * Output: Void
-	 */
+    while(1)
+    {
 
-    __asm volatile(
-        "MRS R0, PSP \n"
-        "STMDB R0!, {R4-R11} \n"
-        "STR R0, %0 \n"
-        : "=m" (process->stackPointer)
-        :
-        : "memory"
-    );
-
-
-
-    process->state = BLOCKED;
-
-
+    	//HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_4);
+    	//flagg = 1;
+    	mutex = 1;
+    	HAL_GPIO_WritePin(GPIOE, GPIO_PIN_4, GPIO_PIN_RESET);
+    	fill_screen1(0xF100);
+    	fill_screen1(0xF1AA);
+    	fill_screen1(0xFFFF);
+    	mutex = 0;
+    	HAL_Delay(20);
+    }
 }
-
-inline void rtos_restore_context(TCB *process)
-{
-	/*
-	 * Functie inline pentru restaurarea contextului procesului
-	 * curent la aparitia unei intreruperi.
-	 * Functia va fi apelata doar in cadrul unui ISR.
-	 * Input: Referinta catre procesul curent de restaurat
-	 * Output: Void
-	 */
-
-    __asm volatile(
-        "LDR R0, %0 \n"
-        "MSR PSP, R0 \n"
-        "LDMIA R0!, {R4-R11} \n"
-    	"MOV LR, 0xFFFFFFFD \n"
-        "BX LR \n"
-        :
-        : "m" (process->stackPointer)
-        : "memory"
-    );
-
-
-	 /*Se va face HW unstacking automat pentru:
-	  * pc,lr,r12,r3-r0,xpsr */
-
-	 process->state = RUNNING;
-
-
-}
-
-
-void rtos_scheduler(uint8_t processID)
-{
-	if(processID == 0)
-	{
-		return;
-	}
-
-	TCB *temp = prim;
-
-	while((temp!=NULL))
-	{
-		if(processID == temp->pid)
-		{
-			activeProcess = temp;
-			break;
-		}
-
-		else
-		{
-			temp = temp->pnext;
-		}
-
-	}
-
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
