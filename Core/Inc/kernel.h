@@ -16,8 +16,7 @@
 #include <stdint.h>
 
 __attribute__((naked))void kernel_start(void);
-void kernel_init(void);
-volatile void Task0(void);
-volatile void Task1(void);
+void kernel_add_process(void (*adrFunction)(void));
+
 
 #endif /* INC_KERNEL_H_ */

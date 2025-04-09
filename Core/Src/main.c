@@ -215,6 +215,53 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 }
 
 
+volatile void Task0()
+{
+
+	ENTITY entity;
+	entity.x0 = 0;
+	entity.y0 = 200;
+	entity.x1 = 64;
+	entity.y1 = 64;
+	entity.id = 0x80;
+	entity.ST.color = 0xF100;
+
+    while(1)
+    {
+        //HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_4);
+        //mutex = 1;
+        HAL_GPIO_WritePin(GPIOE, GPIO_PIN_4, GPIO_PIN_SET);
+        translation_entity(&entity, entity.x0+1, entity.y0, 1);
+    	//mutex = 0;
+        HAL_Delay(40);
+
+    }
+}
+
+volatile void Task1()
+{
+	ENTITY entity;
+	entity.x0 = 0;
+	entity.y0 = 0;
+	entity.x1 = 64;
+	entity.y1 = 64;
+	entity.id = 0x80;
+	entity.ST.color = 0xF100;
+
+    while(1)
+    {
+
+    	//HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_4);
+    	//flagg = 1;
+    	//mutex = 1;
+        HAL_GPIO_WritePin(GPIOE, GPIO_PIN_4, GPIO_PIN_RESET);
+        translation_entity(&entity, entity.x0+1, entity.y0, 1);
+    	//mutex = 0;
+    	HAL_Delay(40);
+    }
+}
+
+
 /* USER CODE END 0 */
 
 /**
@@ -235,7 +282,7 @@ int main(void)
 
   /* USER CODE BEGIN Init */
   HAL_NVIC_SetPriority(PendSV_IRQn, 15, 0);
-  //HAL_NVIC_SetPriority(TIM4_IRQn, 14, 0);
+  HAL_NVIC_SetPriority(TIM4_IRQn, 14, 0);
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -264,7 +311,10 @@ int main(void)
   HAL_TIM_Base_Start_IT(&htim4);
   HAL_SPI_Receive_IT(&hspi2, &dataController, sizeof(dataController)); /*Initializare SPI2 intr Controller*/
 
-  kernel_init();
+  fill_screen2(0xFFFF);
+
+  kernel_add_process(Task0);
+  kernel_add_process(Task1);
   kernel_start();
 
   while(1)
@@ -317,11 +367,10 @@ int main(void)
   assign_file_path_entity(&entity, "graphic/multi2.bin");
   draw_entity(&entity);
   HAL_Delay(1000);
-  //fill_screen2(0xFFFF);
   scaling_entity(&entity, 38);
-  HAL_Delay(1000);
   draw_rectangle(entity.x0, entity.y0, entity.x1, entity.y1, BackGroundColor);
   draw_entity(&entity);
+  HAL_Delay(1000);
 
   //--------------------------------------------
 

@@ -11,8 +11,8 @@
 #include "graphics.h"
 
 #define MAXPR 2
-#define STACKSIZE 250 /*stack-ul fiecarui proces va avea un maxim*/
-					  /*de 250*4o=1ko*/
+#define STACKSIZE 2048 /*stack-ul fiecarui proces va avea un maxim*/
+					   /*de 2048*4o~8ko*/
 
 extern uint8_t startOS; /*variabila de start definita in main*/
 
@@ -22,7 +22,9 @@ typedef struct TCB
 {
   int32_t *pstack;           /*Pointer de stiva al procesului (contine adr de mem 32 de biti)*/
   struct TCB *pnext;         /*Adresa urmatorului TCB*/
+  void (*pfunction)(void);
   int32_t stack[STACKSIZE];  /*Zona de stiva pentru fiecare proces(inspre care pstack va pointa)*/
+  uint8_t pID;
 
 }TCB;
 
@@ -30,7 +32,6 @@ typedef struct TCB
 TCB tcb[MAXPR];
 TCB *currentProcess;
 
-int32_t TCB_STACK[MAXPR][STACKSIZE];
 
 
 __attribute__((naked)) void PendSV_Handler(void)
@@ -63,8 +64,8 @@ __attribute__((naked)) void PendSV_Handler(void)
     __asm("LDR     R1, [R1,#4]"); /*diferentiere pentru pnext*/
     __asm("STR     R1, [R0]");
     __asm("LDR     R4, [R1]");
-    __asm("MOV     SP, R4");
-    __asm("POP     {R4-R7}");
+    __asm("MOV     SP, R4");      /*In R4 avem adresa stivei pnext proces OBS: De realizat un scheduler care */
+    __asm("POP     {R4-R7}");		/*returneaza adresa tcb[i] a urmatorului proces de pus in executie*/
     __asm("MOV     R8, R4");
     __asm("MOV     R9, R5");
     __asm("MOV     R10, R6");
@@ -75,30 +76,44 @@ __attribute__((naked)) void PendSV_Handler(void)
     __asm("BX      LR");
 }
 
-void kernel_init()
-{
-	/*
-	 * Functie pentru initializarea kernelului.
-	 * Se vor initializa in mod static procesele din sistem
-	 */
 
+void kernel_add_process(void (*adrFunction)(void))
+{
 	__asm("CPSID   I");
 
-	tcb[0].pnext = &tcb[1];
-	tcb[1].pnext = &tcb[0];
+	static uint8_t nrProc = 0;
 
-	tcb[0].pstack = &tcb[0].stack[STACKSIZE-16];
-	tcb[0].stack[STACKSIZE-1] = 0x01000000;
-	tcb[0].stack[STACKSIZE-2] = (int32_t)(Task0);
+	if(nrProc == 0)
+	{
+		tcb[0].pnext = &tcb[0];
 
-	tcb[1].pstack = &tcb[1].stack[STACKSIZE-16];
-	tcb[1].stack[STACKSIZE-1] = 0x01000000;
-	tcb[1].stack[STACKSIZE-2] = (int32_t)(Task1);
+		tcb[0].pstack = &tcb[0].stack[STACKSIZE-16];            /*Atribuire SP*/
+		tcb[0].pfunction = adrFunction;                         /*Atribuire adr task in TCB*/
+		tcb[0].stack[STACKSIZE-1] = 0x01000000;                 /*Atribuire thumb mod operare reg*/
+		tcb[0].stack[STACKSIZE-2] = (int32_t)tcb[0].pfunction;  /*Atribuire reg PC catre adr incep Task/functie*/
+		tcb[0].pID = nrProc++;
 
-    currentProcess = &tcb[0];
+	}
+
+	else
+	{
+		tcb[nrProc].pnext = &tcb[nrProc-1];
+		tcb[0].pnext = &tcb[nrProc];
+
+		tcb[nrProc].pstack = &tcb[nrProc].stack[STACKSIZE-16];           /*Atribuire SP*/
+		tcb[nrProc].pfunction = adrFunction;                             /*Atribuire adr task in TCB*/
+		tcb[nrProc].stack[STACKSIZE-1] = 0x01000000;                     /*Atribuire thumb mod operare reg*/
+		tcb[nrProc].stack[STACKSIZE-2] = (int32_t)tcb[nrProc].pfunction; /*Atribuire reg PC catre adr incep Task/functie*/
+		tcb[nrProc].pID = nrProc;
+
+	    currentProcess = &tcb[nrProc];
+	    nrProc++;
+	}
 
     __asm("CPSIE   I ");
+
 }
+
 
 
 __attribute__((naked)) void kernel_start(void)
@@ -139,35 +154,4 @@ __attribute__((naked)) void kernel_start(void)
 
 
 
-volatile void Task0()
-{
-    while(1)
-    {
 
-
-       //HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_4);
-       mutex = 1;
-       HAL_GPIO_WritePin(GPIOE, GPIO_PIN_4, GPIO_PIN_SET);
-       fill_screen1(0x0000);
-       mutex = 0;
-       HAL_Delay(20);
-
-    }
-}
-
-volatile void Task1()
-{
-    while(1)
-    {
-
-    	//HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_4);
-    	//flagg = 1;
-    	mutex = 1;
-    	HAL_GPIO_WritePin(GPIOE, GPIO_PIN_4, GPIO_PIN_RESET);
-    	fill_screen1(0xF100);
-    	fill_screen1(0xF1AA);
-    	fill_screen1(0xFFFF);
-    	mutex = 0;
-    	HAL_Delay(20);
-    }
-}
