@@ -209,7 +209,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
     	if(startOS == 1 && mutex==0)
     	{
-    		SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
+    		SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk; /*comutare de context cu ISR PendSV*/
     	}
     }
 }
@@ -264,8 +264,8 @@ int main(void)
   HAL_TIM_Base_Start_IT(&htim4);
   HAL_SPI_Receive_IT(&hspi2, &dataController, sizeof(dataController)); /*Initializare SPI2 intr Controller*/
 
-  OsInitThreadStack();
-  LaunchScheduler();
+  kernel_init();
+  kernel_start();
 
   while(1)
   {

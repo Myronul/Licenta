@@ -1,6 +1,5 @@
-../Core/Src/kernel.c:40:29:PendSV_Handler	1
-../Core/Src/kernel.c:90:6:OsInitThreadStack	1
-../Core/Src/kernel.c:132:29:LaunchScheduler	1
-../Core/Src/kernel.c:171:6:portable_delay_cycles	2
-../Core/Src/kernel.c:179:15:Task0	1
-../Core/Src/kernel.c:195:15:Task1	1
+../Core/Src/kernel.c:35:29:PendSV_Handler	1
+../Core/Src/kernel.c:74:6:kernel_init	1
+../Core/Src/kernel.c:99:29:kernel_start	1
+../Core/Src/kernel.c:129:15:Task0	1
+../Core/Src/kernel.c:145:15:Task1	1

@@ -1,6 +1,5 @@
-../Core/Src/kernel.c:40:29:PendSV_Handler	0	static,ignoring_inline_asm
-../Core/Src/kernel.c:90:6:OsInitThreadStack	4	static,ignoring_inline_asm
-../Core/Src/kernel.c:132:29:LaunchScheduler	0	static,ignoring_inline_asm
-../Core/Src/kernel.c:171:6:portable_delay_cycles	16	static
-../Core/Src/kernel.c:179:15:Task0	8	static
-../Core/Src/kernel.c:195:15:Task1	8	static
+../Core/Src/kernel.c:35:29:PendSV_Handler	0	static,ignoring_inline_asm
+../Core/Src/kernel.c:74:6:kernel_init	4	static,ignoring_inline_asm
+../Core/Src/kernel.c:99:29:kernel_start	0	static,ignoring_inline_asm
+../Core/Src/kernel.c:129:15:Task0	8	static
+../Core/Src/kernel.c:145:15:Task1	8	static
