@@ -29,25 +29,25 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   ALLOC
  12 .ARM.attributes 00000030  00000000  00000000  0000a05c  2**0
                   CONTENTS, READONLY
- 13 .debug_info   0001a491  00000000  00000000  0000a08c  2**0
+ 13 .debug_info   0001a4ae  00000000  00000000  0000a08c  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_abbrev 00003b3b  00000000  00000000  0002451d  2**0
+ 14 .debug_abbrev 00003b3b  00000000  00000000  0002453a  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_aranges 000017a8  00000000  00000000  00028058  2**3
+ 15 .debug_aranges 000017a8  00000000  00000000  00028078  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_rnglists 0000126a  00000000  00000000  00029800  2**0
+ 16 .debug_rnglists 0000126a  00000000  00000000  00029820  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_macro  00005009  00000000  00000000  0002aa6a  2**0
+ 17 .debug_macro  00005009  00000000  00000000  0002aa8a  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_line   0001eb33  00000000  00000000  0002fa73  2**0
+ 18 .debug_line   0001eb33  00000000  00000000  0002fa93  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_str    000d6b67  00000000  00000000  0004e5a6  2**0
+ 19 .debug_str    000d6b67  00000000  00000000  0004e5c6  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 20 .comment      00000043  00000000  00000000  0012510d  2**0
+ 20 .comment      00000043  00000000  00000000  0012512d  2**0
                   CONTENTS, READONLY
- 21 .debug_frame  000066d4  00000000  00000000  00125150  2**2
+ 21 .debug_frame  000066d4  00000000  00000000  00125170  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 22 .debug_line_str 0000006c  00000000  00000000  0012b824  2**0
+ 22 .debug_line_str 0000006c  00000000  00000000  0012b844  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -566,6 +566,7 @@ void fill_screen1(uint16_t color)
 
     __asm("CPSID   I");
  8000608:	b672      	cpsid	i
+
     __asm("PUSH    {R4-R7}");
  800060a:	b4f0      	push	{r4, r5, r6, r7}
     __asm("MOV     R4, R8");
@@ -578,6 +579,7 @@ void fill_screen1(uint16_t color)
  8000612:	465f      	mov	r7, fp
     __asm("PUSH    {R4-R7}");
  8000614:	b4f0      	push	{r4, r5, r6, r7}
+
     __asm("LDR     R0, =currentProcess");
  8000616:	4808      	ldr	r0, [pc, #32]	@ (8000638 <PendSV_Handler+0x30>)
     __asm("LDR     R1, [R0]");
@@ -606,13 +608,14 @@ void fill_screen1(uint16_t color)
  800062e:	46bb      	mov	fp, r7
     __asm("POP     {R4-R7}");
  8000630:	bcf0      	pop	{r4, r5, r6, r7}
+
     __asm("CPSIE   I ");
  8000632:	b662      	cpsie	i
     __asm("BX      LR");
  8000634:	4770      	bx	lr
 }
  8000636:	bf00      	nop
- 8000638:	2000008c 	.word	0x2000008c
+ 8000638:	2000085c 	.word	0x2000085c
 
 0800063c <kernel_init>:
 
@@ -624,72 +627,74 @@ void kernel_init()
 	 * Functie pentru initializarea kernelului.
 	 * Se vor initializa in mod static procesele din sistem
 	 */
+
 	__asm("CPSID   I");
  8000640:	b672      	cpsid	i
 
 	tcb[0].pnext = &tcb[1];
- 8000642:	4b13      	ldr	r3, [pc, #76]	@ (8000690 <kernel_init+0x54>)
- 8000644:	4a13      	ldr	r2, [pc, #76]	@ (8000694 <kernel_init+0x58>)
+ 8000642:	4b14      	ldr	r3, [pc, #80]	@ (8000694 <kernel_init+0x58>)
+ 8000644:	4a14      	ldr	r2, [pc, #80]	@ (8000698 <kernel_init+0x5c>)
  8000646:	605a      	str	r2, [r3, #4]
 	tcb[1].pnext = &tcb[0];
- 8000648:	4b11      	ldr	r3, [pc, #68]	@ (8000690 <kernel_init+0x54>)
- 800064a:	4a11      	ldr	r2, [pc, #68]	@ (8000690 <kernel_init+0x54>)
- 800064c:	60da      	str	r2, [r3, #12]
+ 8000648:	4b12      	ldr	r3, [pc, #72]	@ (8000694 <kernel_init+0x58>)
+ 800064a:	4a12      	ldr	r2, [pc, #72]	@ (8000694 <kernel_init+0x58>)
+ 800064c:	f8c3 23f4 	str.w	r2, [r3, #1012]	@ 0x3f4
 
-	tcb[0].pstack = &TCB_STACK[0][STACKSIZE-16];
- 800064e:	4b10      	ldr	r3, [pc, #64]	@ (8000690 <kernel_init+0x54>)
- 8000650:	4a11      	ldr	r2, [pc, #68]	@ (8000698 <kernel_init+0x5c>)
- 8000652:	601a      	str	r2, [r3, #0]
-	TCB_STACK[0][STACKSIZE-1] = 0x01000000;
- 8000654:	4b11      	ldr	r3, [pc, #68]	@ (800069c <kernel_init+0x60>)
- 8000656:	f04f 7280 	mov.w	r2, #16777216	@ 0x1000000
- 800065a:	f8c3 23e4 	str.w	r2, [r3, #996]	@ 0x3e4
-	TCB_STACK[0][STACKSIZE-2] = (int32_t)(Task0);
- 800065e:	4a10      	ldr	r2, [pc, #64]	@ (80006a0 <kernel_init+0x64>)
- 8000660:	4b0e      	ldr	r3, [pc, #56]	@ (800069c <kernel_init+0x60>)
- 8000662:	f8c3 23e0 	str.w	r2, [r3, #992]	@ 0x3e0
+	tcb[0].pstack = &tcb[0].stack[STACKSIZE-16];
+ 8000650:	4b10      	ldr	r3, [pc, #64]	@ (8000694 <kernel_init+0x58>)
+ 8000652:	4a12      	ldr	r2, [pc, #72]	@ (800069c <kernel_init+0x60>)
+ 8000654:	601a      	str	r2, [r3, #0]
+	tcb[0].stack[STACKSIZE-1] = 0x01000000;
+ 8000656:	4b0f      	ldr	r3, [pc, #60]	@ (8000694 <kernel_init+0x58>)
+ 8000658:	f04f 7280 	mov.w	r2, #16777216	@ 0x1000000
+ 800065c:	f8c3 23ec 	str.w	r2, [r3, #1004]	@ 0x3ec
+	tcb[0].stack[STACKSIZE-2] = (int32_t)(Task0);
+ 8000660:	4a0f      	ldr	r2, [pc, #60]	@ (80006a0 <kernel_init+0x64>)
+ 8000662:	4b0c      	ldr	r3, [pc, #48]	@ (8000694 <kernel_init+0x58>)
+ 8000664:	f8c3 23e8 	str.w	r2, [r3, #1000]	@ 0x3e8
 
-    tcb[1].pstack = &TCB_STACK[1][STACKSIZE-16];
- 8000666:	4b0a      	ldr	r3, [pc, #40]	@ (8000690 <kernel_init+0x54>)
- 8000668:	4a0e      	ldr	r2, [pc, #56]	@ (80006a4 <kernel_init+0x68>)
- 800066a:	609a      	str	r2, [r3, #8]
-    TCB_STACK[1][STACKSIZE-1] = 0x01000000;
- 800066c:	4b0b      	ldr	r3, [pc, #44]	@ (800069c <kernel_init+0x60>)
- 800066e:	f04f 7280 	mov.w	r2, #16777216	@ 0x1000000
- 8000672:	f8c3 27cc 	str.w	r2, [r3, #1996]	@ 0x7cc
-    TCB_STACK[1][STACKSIZE-2] = (int32_t)(Task1);
- 8000676:	4a0c      	ldr	r2, [pc, #48]	@ (80006a8 <kernel_init+0x6c>)
- 8000678:	4b08      	ldr	r3, [pc, #32]	@ (800069c <kernel_init+0x60>)
- 800067a:	f8c3 27c8 	str.w	r2, [r3, #1992]	@ 0x7c8
+	tcb[1].pstack = &tcb[1].stack[STACKSIZE-16];
+ 8000668:	4b0a      	ldr	r3, [pc, #40]	@ (8000694 <kernel_init+0x58>)
+ 800066a:	4a0e      	ldr	r2, [pc, #56]	@ (80006a4 <kernel_init+0x68>)
+ 800066c:	f8c3 23f0 	str.w	r2, [r3, #1008]	@ 0x3f0
+	tcb[1].stack[STACKSIZE-1] = 0x01000000;
+ 8000670:	4b08      	ldr	r3, [pc, #32]	@ (8000694 <kernel_init+0x58>)
+ 8000672:	f04f 7280 	mov.w	r2, #16777216	@ 0x1000000
+ 8000676:	f8c3 27dc 	str.w	r2, [r3, #2012]	@ 0x7dc
+	tcb[1].stack[STACKSIZE-2] = (int32_t)(Task1);
+ 800067a:	4a0b      	ldr	r2, [pc, #44]	@ (80006a8 <kernel_init+0x6c>)
+ 800067c:	4b05      	ldr	r3, [pc, #20]	@ (8000694 <kernel_init+0x58>)
+ 800067e:	f8c3 27d8 	str.w	r2, [r3, #2008]	@ 0x7d8
 
     currentProcess = &tcb[0];
- 800067e:	4b0b      	ldr	r3, [pc, #44]	@ (80006ac <kernel_init+0x70>)
- 8000680:	4a03      	ldr	r2, [pc, #12]	@ (8000690 <kernel_init+0x54>)
- 8000682:	601a      	str	r2, [r3, #0]
+ 8000682:	4b0a      	ldr	r3, [pc, #40]	@ (80006ac <kernel_init+0x70>)
+ 8000684:	4a03      	ldr	r2, [pc, #12]	@ (8000694 <kernel_init+0x58>)
+ 8000686:	601a      	str	r2, [r3, #0]
 
     __asm("CPSIE   I ");
- 8000684:	b662      	cpsie	i
+ 8000688:	b662      	cpsie	i
 }
- 8000686:	bf00      	nop
- 8000688:	46bd      	mov	sp, r7
- 800068a:	f85d 7b04 	ldr.w	r7, [sp], #4
- 800068e:	4770      	bx	lr
- 8000690:	2000007c 	.word	0x2000007c
- 8000694:	20000084 	.word	0x20000084
- 8000698:	20000438 	.word	0x20000438
- 800069c:	20000090 	.word	0x20000090
+ 800068a:	bf00      	nop
+ 800068c:	46bd      	mov	sp, r7
+ 800068e:	f85d 7b04 	ldr.w	r7, [sp], #4
+ 8000692:	4770      	bx	lr
+ 8000694:	2000007c 	.word	0x2000007c
+ 8000698:	2000046c 	.word	0x2000046c
+ 800069c:	2000042c 	.word	0x2000042c
  80006a0:	080006ed 	.word	0x080006ed
- 80006a4:	20000820 	.word	0x20000820
+ 80006a4:	2000081c 	.word	0x2000081c
  80006a8:	08000721 	.word	0x08000721
- 80006ac:	2000008c 	.word	0x2000008c
+ 80006ac:	2000085c 	.word	0x2000085c
 
 080006b0 <kernel_start>:
-
-
-__attribute__((naked)) void kernel_start(void)
 {
+	/*
+	 * Functie de start a kernelului.
+	 */
+
 	__asm("CPSID   I");
  80006b0:	b672      	cpsid	i
+
 	__asm("LDR     R0, =startOS");
  80006b2:	480c      	ldr	r0, [pc, #48]	@ (80006e4 <kernel_start+0x34>)
 	__asm("MOV     R1, 1");
@@ -702,8 +707,9 @@ __attribute__((naked)) void kernel_start(void)
  80006bc:	6802      	ldr	r2, [r0, #0]
     __asm("LDR     R4, [R2]");
  80006be:	6814      	ldr	r4, [r2, #0]
-    __asm("MOV     SP, R4");
+    __asm("MOV     SP, R4"); /*punem in SP procesorului pstack al &curentProc*/
  80006c0:	46a5      	mov	sp, r4
+    /*restauram contextul initial, emuland o intr*/
     __asm("POP     {R4-R7}");
  80006c2:	bcf0      	pop	{r4, r5, r6, r7}
     __asm("MOV     R8, R4");
@@ -722,14 +728,16 @@ __attribute__((naked)) void kernel_start(void)
  80006d0:	bc10      	pop	{r4}
     __asm("MOV     R12, R4");
  80006d2:	46a4      	mov	ip, r4
-    __asm("ADD     SP,SP,#4");
+    __asm("ADD     SP,SP,#4"); /*restauram registrul LR sarind peste R12*/
  80006d4:	b001      	add	sp, #4
-    __asm("POP     {R4}");
+    __asm("POP     {R4}");		/*deaorece nu se poate face pop pentru R12*/
  80006d6:	bc10      	pop	{r4}
+
     __asm("MOV     LR, R4");
  80006d8:	46a6      	mov	lr, r4
-    __asm("ADD     SP,SP,#4");
+    __asm("ADD     SP,SP,#4"); /*simulam comportamentul stivei sarind la PC*/
  80006da:	b001      	add	sp, #4
+
     __asm("CPSIE   I ");
  80006dc:	b662      	cpsie	i
     __asm("BX      LR");
@@ -739,7 +747,7 @@ __attribute__((naked)) void kernel_start(void)
  80006e0:	bf00      	nop
  80006e2:	0000      	.short	0x0000
  80006e4:	20000ba4 	.word	0x20000ba4
- 80006e8:	2000008c 	.word	0x2000008c
+ 80006e8:	2000085c 	.word	0x2000085c
 
 080006ec <Task0>:
 

@@ -1,5 +1,5 @@
-../Core/Src/kernel.c:35:29:PendSV_Handler	0	static,ignoring_inline_asm
-../Core/Src/kernel.c:74:6:kernel_init	4	static,ignoring_inline_asm
-../Core/Src/kernel.c:99:29:kernel_start	0	static,ignoring_inline_asm
-../Core/Src/kernel.c:129:15:Task0	8	static
-../Core/Src/kernel.c:145:15:Task1	8	static
+../Core/Src/kernel.c:36:29:PendSV_Handler	0	static,ignoring_inline_asm
+../Core/Src/kernel.c:78:6:kernel_init	4	static,ignoring_inline_asm
+../Core/Src/kernel.c:104:29:kernel_start	0	static,ignoring_inline_asm
+../Core/Src/kernel.c:142:15:Task0	8	static
+../Core/Src/kernel.c:158:15:Task1	8	static
