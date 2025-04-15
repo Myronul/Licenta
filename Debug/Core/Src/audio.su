@@ -1,7 +1,7 @@
-../Core/Src/audio.c:18:6:play_audio_file	32	static
-../Core/Src/audio.c:62:13:vibrato_filter	24	static
-../Core/Src/audio.c:120:6:play_audio_file_vibrato	32	static
-../Core/Src/audio.c:235:13:echo_filter	32	static
-../Core/Src/audio.c:291:6:play_audio_file_echo	40	static
-../Core/Src/audio.c:340:13:reverb_filter	48	static
-../Core/Src/audio.c:415:6:play_audio_file_reverb	32	static
+../Core/Src/audio.c:19:6:play_audio_file	32	static
+../Core/Src/audio.c:68:13:vibrato_filter	24	static
+../Core/Src/audio.c:126:6:play_audio_file_vibrato	32	static
+../Core/Src/audio.c:241:13:echo_filter	32	static
+../Core/Src/audio.c:297:6:play_audio_file_echo	40	static
+../Core/Src/audio.c:346:13:reverb_filter	48	static
+../Core/Src/audio.c:421:6:play_audio_file_reverb	32	static

@@ -13,6 +13,6 @@
 ../Core/Src/graphics.c:360:6:free_entity_sd	1
 ../Core/Src/graphics.c:367:6:draw_entity	9
 ../Core/Src/graphics.c:476:6:translation_entity	17
-../Core/Src/graphics.c:553:6:translation_test	5
-../Core/Src/graphics.c:603:6:scaling_entity	10
-../Core/Src/graphics.c:745:6:rotate_entity	6
+../Core/Src/graphics.c:562:6:translation_test	5
+../Core/Src/graphics.c:619:6:scaling_entity	10
+../Core/Src/graphics.c:761:6:rotate_entity	6

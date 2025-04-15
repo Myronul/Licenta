@@ -74,7 +74,7 @@ void fill_screen1(uint16_t color);
 void fill_screen2(uint16_t color);
 
 void print_character(uint16_t x, uint16_t y, char c, uint16_t fontColor, uint16_t backColor );
-void print_string(uint16_t x, uint16_t y, char* string, uint8_t n, uint16_t fontColor, uint16_t backColor);
+void print_string(uint16_t x, uint16_t y, char* string, uint16_t fontColor, uint16_t backColor);
 void draw_horizontal_line(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t color);
 void draw_vertical_line(uint16_t x0, uint16_t y0, uint16_t y1, uint16_t color);
 void draw_rectangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color);

@@ -15,6 +15,9 @@
 #include "stm32f4xx_hal.h"
 #include <stdint.h>
 
+extern uint8_t startOS; /*flag de semnalizare start so*/
+extern int mutex;
+
 __attribute__((naked))void kernel_start(void);
 void kernel_add_process(void (*adrFunction)(void));
 

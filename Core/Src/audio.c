@@ -6,6 +6,7 @@
  */
 
 #include"audio.h"
+#include"kernel.h"
 
 volatile extern bool flagDmaDAC;
 extern DAC_HandleTypeDef hdac;
@@ -35,15 +36,20 @@ void play_audio_file(char *path)
 		return;
 	}
 
+	mutex = 1;
 	read_audio_file(path, buffer, &flagAudioDone); /*Citire in prima jumatate a bufferului -> 1024 de elemente*/
 	HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, buffer, 2048, DAC_ALIGN_12B_R);
 
 	while(!flagAudioDone)
 	{
+		mutex = 1;
 		read_audio_file(path, buffer+1024, &flagAudioDone);
+		mutex = 0;
 		while(flagDmaDAC == 0);
 		flagDmaDAC = 0;
+		mutex = 1;
 		read_audio_file(path, buffer, &flagAudioDone);
+		mutex = 0;
 		while(flagDmaDAC == 0);
 		flagDmaDAC = 0;
 

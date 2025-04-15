@@ -86,11 +86,7 @@ volatile bool flagDmaDAC = 0;      /*Flag pentru DMA pe DAC si bufferele aferent
 uint8_t dataController = 0;
 uint8_t currentDx = 0;
 
-/*mutex*/
-
-uint8_t startOS = 0;
-
-
+unsigned int k = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -197,15 +193,68 @@ void HAL_DAC_ConvHalfCpltCallbackCh1(DAC_HandleTypeDef *hdac)
 
 }
 
-unsigned int k = 0;
-extern int mutex;
+uint8_t flagtask3 = 0;
+
+void controller_test()
+{
+	ENTITY entity;
+	entity.x0 = 0;
+	entity.y0 = 300;
+	entity.x1 = 64;
+	entity.y1 = 64;
+	entity.id = 0x80;
+	entity.ST.color = 0xF100;
+
+	draw_entity(&entity);
+
+	while(1)
+	{
+
+		switch(currentDx)
+		{
+			case DxRight:
+				translation_entity(&entity, entity.x0+32, entity.y0, 1);
+				currentDx = 0;
+				break;
+			case DxLeft:
+				translation_entity(&entity, entity.x0-32, entity.y0, 1);
+				currentDx = 0;
+				break;
+			case DxUp:
+				translation_entity(&entity, entity.x0, entity.y0-32, 1);
+				currentDx = 0;
+				break;
+			case DxDown:
+				translation_entity(&entity, entity.x0, entity.y0+32, 1);
+				currentDx = 0;
+				break;
+			default:
+				currentDx = 0;
+				break;
+		}
+
+		flagtask3 = 0;
+		k = 0;
+		while(!flagtask3);
+		//HAL_Delay(200);
+
+	}
+
+}
+
+
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
     if (htim->Instance == TIM4)
     {
 
-    	k = (k+1)%50;
+    	k = (k+1)%100;
+
+    	if(!k)
+    	{
+    		flagtask3 = 1;
+    	}
 
     	if(startOS == 1 && mutex==0)
     	{
@@ -220,7 +269,7 @@ volatile void Task0()
 
 	ENTITY entity;
 	entity.x0 = 0;
-	entity.y0 = 200;
+	entity.y0 = 0;
 	entity.x1 = 64;
 	entity.y1 = 64;
 	entity.id = 0x80;
@@ -230,13 +279,23 @@ volatile void Task0()
     {
         //HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_4);
         //mutex = 1;
-        HAL_GPIO_WritePin(GPIOE, GPIO_PIN_4, GPIO_PIN_SET);
-        translation_entity(&entity, entity.x0+1, entity.y0, 1);
+        //HAL_GPIO_WritePin(GPIOE, GPIO_PIN_4, GPIO_PIN_SET);
+        //HAL_GPIO_WritePin(GPIOE, GPIO_PIN_4, GPIO_PIN_RESET);
+        translation_test(&entity, 1, 0);
     	//mutex = 0;
-        HAL_Delay(40);
-
     }
 }
+
+volatile void Task1()
+{
+
+    while(1)
+    {
+    	play_audio_file("Audio/acoustic.txt");
+    }
+}
+
+/*
 
 volatile void Task1()
 {
@@ -260,6 +319,59 @@ volatile void Task1()
     	HAL_Delay(40);
     }
 }
+*/
+
+volatile void Task2()
+{
+	ENTITY entity;
+	entity.x0 = 0;
+	entity.y0 = 300;
+	entity.x1 = 64;
+	entity.y1 = 64;
+	entity.id = 0x80;
+	entity.ST.color = 0xF100;
+
+    while(1)
+    {
+
+    	//HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_4);
+    	//flagg = 1;
+    	//mutex = 1;
+        //HAL_GPIO_WritePin(GPIOE, GPIO_PIN_4, GPIO_PIN_SET);
+        translation_test(&entity, 1, 0);
+        //translation_entity(&entity, entity.x0+1, entity.y0, 1);
+    	//mutex = 0;
+
+    }
+}
+
+
+volatile void Task3()
+{
+	while(1)
+	{
+		controller_test();
+	}
+}
+
+void demo_os_1()
+{
+	  BackGroundColor = 0xFFFF;
+	  fill_screen2(0xFFFF);
+	  print_string(128, 128, "os demo",0xF100, BackGroundColor);
+
+	  kernel_add_process(Task0);
+	  //kernel_add_process(Task1);
+	  kernel_add_process(Task2);
+	  kernel_add_process(Task3);
+	  kernel_start();
+
+	  while(1)
+	  {
+
+	  }
+}
+
 
 
 /* USER CODE END 0 */
@@ -311,17 +423,9 @@ int main(void)
   HAL_TIM_Base_Start_IT(&htim4);
   HAL_SPI_Receive_IT(&hspi2, &dataController, sizeof(dataController)); /*Initializare SPI2 intr Controller*/
 
-  fill_screen2(0xFFFF);
-
-  kernel_add_process(Task0);
-  kernel_add_process(Task1);
-  kernel_start();
-
-  while(1)
-  {
-
-  }
-
+  fill_screen1(0xFFFF);
+  //controller_test();
+  demo_os_1();
 
   /*Test pentru tastatura*/
 
@@ -580,7 +684,7 @@ int main(void)
   HAL_Delay(1000);
   fill_screen2(0xFFFF);
 
-  print_string(36, 200, "Licenta 2025", 12, 0x1F00, 0x001F);
+  print_string(36, 200, "Licenta 2025", 0x1F00, 0x001F);
 
   uint8_t dataToSend[] = {0x01, 0x02, 0x03, 0x04};
   HAL_SPI_Transmit_DMA(&hspi1, dataToSend, sizeof(dataToSend));
@@ -793,13 +897,12 @@ static void MX_SPI2_Init(void)
   /* USER CODE END SPI2_Init 1 */
   /* SPI2 parameter configuration*/
   hspi2.Instance = SPI2;
-  hspi2.Init.Mode = SPI_MODE_MASTER;
-  hspi2.Init.Direction = SPI_DIRECTION_1LINE;
+  hspi2.Init.Mode = SPI_MODE_SLAVE;
+  hspi2.Init.Direction = SPI_DIRECTION_2LINES_RXONLY;
   hspi2.Init.DataSize = SPI_DATASIZE_8BIT;
   hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi2.Init.NSS = SPI_NSS_SOFT;
-  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
   hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -880,7 +983,7 @@ static void MX_TIM4_Init(void)
   htim4.Instance = TIM4;
   htim4.Init.Prescaler = 84;
   htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim4.Init.Period = 20000;
+  htim4.Init.Period = 1000;
   htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim4) != HAL_OK)

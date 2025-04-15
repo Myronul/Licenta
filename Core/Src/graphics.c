@@ -13,7 +13,7 @@
 
 extern SPI_HandleTypeDef hspi1;
 volatile extern uint8_t flagDmaSpiTx;
-
+extern int mutex;
 
 uint16_t BackGroundColor = 0xFFFF; /*Variabila globala pentru culoarea de fundal curenta*/
 
@@ -243,12 +243,12 @@ void print_character(uint16_t x, uint16_t y, char c, uint16_t fontColor, uint16_
 }
 
 
-void print_string(uint16_t x, uint16_t y, char* string, uint8_t n, uint16_t fontColor, uint16_t backColor)
+void print_string(uint16_t x, uint16_t y, char* string, uint16_t fontColor, uint16_t backColor)
 {
 
 	char *temp = string;
 
-	while(string<(temp+n))
+	while((*string)!='\0')
 	{
 		if(x + font.width > 320)
 		{
@@ -505,15 +505,19 @@ void translation_entity(ENTITY *const restrict entity, int16_t x, int16_t y, boo
 		if((x < (temp.x0+temp.x1)) && (x > (temp.x0)))
 		{
 			/*Pentru cazul deplasarii pe +x*/
+			mutex = 1;
 			draw_entity(entity);
 			draw_rectangle(temp.x0, temp.y0, x-temp.x0, temp.y1, BackGroundColor); /*Culoare background*/
+			mutex = 0;
 		}
 
 		if((x+temp.x1 < (temp.x0+temp.x1)) && (x+temp.x1 > temp.x0))
 		{
 			/*Pentru cazul deplasarii pe -x*/
+			mutex = 1;
 			draw_entity(entity);
 			draw_rectangle(temp.x0+temp.x1-(temp.x0-x), temp.y0, temp.x0-x, temp.y1, BackGroundColor); /*Culoare background*/
+			mutex = 0;
 		}
 
 	}
@@ -525,15 +529,19 @@ void translation_entity(ENTITY *const restrict entity, int16_t x, int16_t y, boo
 			if((y < (temp.y0+temp.y1)) && (y > (temp.y0)))
 			{
 				/*Pentru cazul deplasarii pe +y*/
+				mutex = 1;
 				draw_entity(entity);
 				draw_rectangle(temp.x0, temp.y0, temp.x1, y-temp.y0, BackGroundColor);
+				mutex = 0;
 			}
 
 			if((y+temp.y1 < (temp.y0+temp.y1)) && (y+temp.y1 > temp.y0))
 			{
 				/*Pentru cazul deplasarii pe -y*/
+				mutex = 1;
 				draw_entity(entity);
 				draw_rectangle(temp.x0, temp.y0+temp.y1-(temp.y0-y), temp.x1, temp.y0-y, BackGroundColor);
+				mutex = 0;
 			}
 
 		}
@@ -541,9 +549,10 @@ void translation_entity(ENTITY *const restrict entity, int16_t x, int16_t y, boo
 		else
 		{
 			/*Pentru orice alt caz (deplasare pe diagonala sau aleatoriu)*/
-
+			mutex = 1;
 			draw_entity(entity);
 			draw_rectangle(temp.x0, temp.y0, temp.x1, temp.y1, BackGroundColor);
+			mutex = 0;
 		}
 
 
@@ -561,8 +570,9 @@ void translation_test(ENTITY *entity, uint8_t step, uint16_t delay)
 			translation_entity(entity, entity->x0+step, entity->y0, 1);//, color);
 			HAL_Delay(delay);
 		}
-
+		mutex = 1;
 		draw_entity(entity);
+		mutex = 0;
 		entity->x0 = LCD_Width - entity->x1;
 
 		while((entity->y0 + entity->y1) < LCD_Length)
@@ -572,7 +582,9 @@ void translation_test(ENTITY *entity, uint8_t step, uint16_t delay)
 			HAL_Delay(delay);
 		}
 
+		mutex = 1;
 		draw_entity(entity);
+		mutex = 0;
 		entity->y0 = LCD_Length - entity->y1;
 
 		while((entity->x0 - step) > 0)
@@ -582,7 +594,9 @@ void translation_test(ENTITY *entity, uint8_t step, uint16_t delay)
 		}
 
 		entity->ST.color = 0xFFFF;
+		mutex = 1;
 		draw_entity(entity);
+		mutex = 0;
 		entity->ST.color = 0xF100;
 		entity->x0 = 0;
 
@@ -592,7 +606,9 @@ void translation_test(ENTITY *entity, uint8_t step, uint16_t delay)
 			HAL_Delay(delay);
 		}
 		entity->ST.color = 0xFFFF;
+		mutex = 1;
 		draw_entity(entity);
+		mutex = 0;
 		entity->ST.color = 0xF100;
 		entity->y0 = 0;
 

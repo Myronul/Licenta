@@ -10,13 +10,12 @@
 #include <stdbool.h>
 #include "graphics.h"
 
-#define MAXPR 2
+#define MAXPR 10
 #define STACKSIZE 2048 /*stack-ul fiecarui proces va avea un maxim*/
 					   /*de 2048*4o~8ko*/
 
-extern uint8_t startOS; /*variabila de start definita in main*/
-
-int mutex = 0;
+uint8_t startOS = 0; /*flag de semnalizare start so*/
+int mutex = 0;	/*semafor principal*/
 
 typedef struct TCB
 {
@@ -82,6 +81,12 @@ void kernel_add_process(void (*adrFunction)(void))
 	__asm("CPSID   I");
 
 	static uint8_t nrProc = 0;
+
+	if(nrProc==MAXPR)
+	{
+	    __asm("CPSIE   I ");
+		return;
+	}
 
 	if(nrProc == 0)
 	{
