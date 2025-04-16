@@ -86,7 +86,6 @@ volatile bool flagDmaDAC = 0;      /*Flag pentru DMA pe DAC si bufferele aferent
 uint8_t dataController = 0;
 uint8_t currentDx = 0;
 
-unsigned int k = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -193,7 +192,8 @@ void HAL_DAC_ConvHalfCpltCallbackCh1(DAC_HandleTypeDef *hdac)
 
 }
 
-uint8_t flagtask3 = 0;
+
+
 
 void controller_test()
 {
@@ -233,35 +233,12 @@ void controller_test()
 				break;
 		}
 
-		flagtask3 = 0;
-		k = 0;
-		while(!flagtask3);
-		//HAL_Delay(200);
+		kernel_delay(50);
 
 	}
 
 }
 
-
-
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
-    if (htim->Instance == TIM4)
-    {
-
-    	k = (k+1)%100;
-
-    	if(!k)
-    	{
-    		flagtask3 = 1;
-    	}
-
-    	if(startOS == 1 && mutex==0)
-    	{
-    		SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk; /*comutare de context cu ISR PendSV*/
-    	}
-    }
-}
 
 
 volatile void Task0()
@@ -292,6 +269,7 @@ volatile void Task1()
     while(1)
     {
     	play_audio_file("Audio/acoustic.txt");
+    	kernel_delay(20);
     }
 }
 
@@ -354,6 +332,25 @@ volatile void Task3()
 	}
 }
 
+volatile void Task4()
+{
+	while(1)
+	{
+		HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_4);
+		kernel_delay(2000);
+	}
+}
+
+volatile void Task5()
+{
+	while(1)
+	{
+		HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_4);
+		kernel_delay(2000);
+	}
+}
+
+
 void demo_os_1()
 {
 	  BackGroundColor = 0xFFFF;
@@ -361,9 +358,11 @@ void demo_os_1()
 	  print_string(128, 128, "os demo",0xF100, BackGroundColor);
 
 	  kernel_add_process(Task0);
-	  //kernel_add_process(Task1);
+	  kernel_add_process(Task1);
 	  kernel_add_process(Task2);
 	  kernel_add_process(Task3);
+	  //kernel_add_process(Task4);
+	  //kernel_add_process(Task5);
 	  kernel_start();
 
 	  while(1)

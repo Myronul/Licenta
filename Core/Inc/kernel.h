@@ -21,5 +21,7 @@ extern int mutex;
 __attribute__((naked))void kernel_start(void);
 void kernel_add_process(void (*adrFunction)(void));
 
+void kernel_count_sleep(void);
+void kernel_delay(unsigned int delay);
 
 #endif /* INC_KERNEL_H_ */

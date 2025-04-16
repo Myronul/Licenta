@@ -1,3 +1,7 @@
-../Core/Src/kernel.c:36:29:PendSV_Handler	0	static,ignoring_inline_asm
-../Core/Src/kernel.c:79:6:kernel_add_process	16	static,ignoring_inline_asm
-../Core/Src/kernel.c:124:29:kernel_start	0	static,ignoring_inline_asm
+../Core/Src/kernel.c:51:6:HAL_TIM_PeriodElapsedCallback	16	static
+../Core/Src/kernel.c:73:29:PendSV_Handler	0	static,ignoring_inline_asm
+../Core/Src/kernel.c:124:6:kernel_add_process	16	static,ignoring_inline_asm
+../Core/Src/kernel.c:170:29:kernel_start	0	static,ignoring_inline_asm
+../Core/Src/kernel.c:207:6:kernel_delay	16	static
+../Core/Src/kernel.c:225:13:kernel_scheduler	16	static
+../Core/Src/kernel.c:261:6:kernel_count_sleep	16	static
