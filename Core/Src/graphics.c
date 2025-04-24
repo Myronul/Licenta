@@ -17,6 +17,18 @@ extern int mutex;
 
 uint16_t BackGroundColor = 0xFFFF; /*Variabila globala pentru culoarea de fundal curenta*/
 
+ENTITY cursor;
+
+void init_cursor()
+{
+	cursor.id = 0x88;
+	cursor.x0 = 0;
+	cursor.y0 = 0;
+	cursor.x1 = 16;
+	cursor.y1 = 16;
+	cursor.ST.color = RED;
+}
+
 
 void convert_color_16_to_18(uint16_t color, uint8_t *const pixel)
 {

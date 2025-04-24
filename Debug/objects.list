@@ -1,5 +1,7 @@
+"./Core/Src/app.o"
 "./Core/Src/audio.o"
 "./Core/Src/context.o"
+"./Core/Src/controller.o"
 "./Core/Src/font.o"
 "./Core/Src/graphics.o"
 "./Core/Src/kernel.o"

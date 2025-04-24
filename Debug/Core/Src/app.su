@@ -1,0 +1,9 @@
+../Core/Src/app.c:16:22:Task0	32	static
+../Core/Src/app.c:38:22:Task1	8	static
+../Core/Src/app.c:74:22:Task2	32	static
+../Core/Src/app.c:99:22:Task3	8	static
+../Core/Src/app.c:107:22:Task4	8	static
+../Core/Src/app.c:116:22:Task5	8	static
+../Core/Src/app.c:126:13:demo_os_1	16	static
+../Core/Src/app.c:146:13:set_main_gui	16	static
+../Core/Src/app.c:177:6:main_app	16	static

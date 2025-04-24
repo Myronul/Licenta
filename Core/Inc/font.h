@@ -22,5 +22,4 @@ typedef struct FONT
 extern FONT font; //declaram extern pentru a putea folosi
 				  //fontul in alt fisier(incluzand headerul)
 
-
 #endif /* INC_FONT_H_ */

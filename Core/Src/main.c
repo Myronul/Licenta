@@ -28,6 +28,8 @@
 #include "sdsys.h"
 #include "audio.h"
 #include "kernel.h"
+#include "controller.h"
+#include "app.h"
 #include <stdbool.h>
 
 /* USER CODE END Includes */
@@ -40,14 +42,6 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
-/*Valorile codate predefinite pentru directia controllerului*/
-
-#define DxRight   0x01   /*0b0000 0001*/
-#define DxLeft    0x02   /*0b0000 0010*/
-#define DxUp      0x04   /*0b0000 0100*/
-#define DxDown    0x08   /*0b0000 1000*/
-#define DxStart   0x10   /*0b0001 0000*/
-#define DxSelect  0x20   /*0b0010 0000*/
 
 /* USER CODE END PD */
 
@@ -81,10 +75,6 @@ volatile uint8_t flagDmaSDIORx = 0; /*flag pentru transfer DMA SDIO*/
 
 volatile bool flagDmaDAC = 0;      /*Flag pentru DMA pe DAC si bufferele aferente*/
 
-/*Variabile pentru controller*/
-
-uint8_t dataController = 0;
-uint8_t currentDx = 0;
 
 /* USER CODE END PV */
 
@@ -359,8 +349,8 @@ void demo_os_1()
 
 	  kernel_add_process(Task0);
 	  kernel_add_process(Task1);
-	  kernel_add_process(Task2);
-	  kernel_add_process(Task3);
+	  //kernel_add_process(Task2);
+	  //kernel_add_process(Task3);
 	  //kernel_add_process(Task4);
 	  //kernel_add_process(Task5);
 	  kernel_start();
@@ -422,9 +412,12 @@ int main(void)
   HAL_TIM_Base_Start_IT(&htim4);
   HAL_SPI_Receive_IT(&hspi2, &dataController, sizeof(dataController)); /*Initializare SPI2 intr Controller*/
 
+  main_app(); /*FSM principal al sistemului*/
+
   fill_screen1(0xFFFF);
+  //play_audio_file("Audio/acoustic.txt");
   //controller_test();
-  demo_os_1();
+  //demo_os_1();
 
   /*Test pentru tastatura*/
 

@@ -112,4 +112,11 @@ static const uint16_t dataFont11x18 [] = {
 };
 
 
-FONT font = {dataFont11x18, 11,18}; //variabila definita in header ca extern
+FONT font = {dataFont11x18, 11,18}; //variabile definite in header ca extern
+
+
+
+
+
+
+
