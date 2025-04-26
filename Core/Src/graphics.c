@@ -329,6 +329,58 @@ void draw_vertical_line(uint16_t x0, uint16_t y0, uint16_t y1, uint16_t color)
 }
 
 
+void draw_rectangle_slow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color)
+{
+	/*
+	 * Functie pentru desenarea unui dreptunghi/patrat pe ecranul LCD
+	 * oricat de mare, cu latente suplimentare
+	 * Input: (x0,y0) coordonatele initiale
+	 * 		  (x1,y1) offseturile fata de coordonatele initiale (numarul de pixeli)
+	 * Output: Void
+	 */
+
+
+	uint16_t frameSize = 1024; /*nr de pixel dintr-un frame*/
+	uint8_t pixel[3];
+	unsigned int pixelNr = x1*y1;
+	uint16_t frameNr = pixelNr/frameSize;
+	uint16_t reaminder = pixelNr%frameSize;
+
+	if(pixelNr%frameSize != 0)
+	{
+		frameNr++;
+	}
+
+	convert_color_16_to_18(color, pixel);
+
+	uint8_t *data = malloc(sizeof(pixel)*frameSize);
+
+	for(uint16_t i=0; i<frameSize; i++)
+	{
+		memcpy(data + i*sizeof(pixel), pixel, sizeof(pixel));
+	}
+
+	set_adress_window(x0, y0, x0+x1-1, y0+y1-1, 'w');
+
+	for (uint16_t i=0; i<frameNr; i++)
+	{
+		if (i==frameNr-1 && reaminder!=0)
+		{
+			LCD_send_data_multi(data, reaminder*sizeof(pixel));
+		}
+
+		else
+		{
+			LCD_send_data_multi(data, frameSize*sizeof(pixel));
+		}
+
+	}
+
+	free(data);
+
+}
+
+
 void draw_rectangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color)
 {
 	/*
@@ -356,6 +408,7 @@ void draw_rectangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t
 	free(data);
 
 }
+
 
 
 void init_entity_sd(ENTITY *entity)
@@ -496,7 +549,7 @@ void translation_entity(ENTITY *const restrict entity, int16_t x, int16_t y, boo
 	 */
 
 
-	if(x<0 || x>LCD_Width || y<0 || y> LCD_Length)
+	if((x)<0 || (x+entity->x1)>LCD_Width || (y)<0 || (y+entity->y1)> LCD_Length)
 	{
 		/*Pentru cazul depasirii limitelor ecranului*/
 
@@ -562,8 +615,8 @@ void translation_entity(ENTITY *const restrict entity, int16_t x, int16_t y, boo
 		{
 			/*Pentru orice alt caz (deplasare pe diagonala sau aleatoriu)*/
 			mutex = 1;
-			draw_entity(entity);
 			draw_rectangle(temp.x0, temp.y0, temp.x1, temp.y1, BackGroundColor);
+			draw_entity(entity);
 			mutex = 0;
 		}
 
@@ -635,14 +688,22 @@ void scaling_entity(ENTITY *entity, const float factor)
 	 * o referinta catre entitatea de scalat si factorul asociat
 	 */
 
-	/*Vom elimina din sfera vizuala imaginea de scalat*/
-
-	draw_rectangle(entity->x0, entity->y0, entity->x1, entity->y1, BackGroundColor);
 
 	/*
 	 * Initial vom afla noile marimi pentru imaginea
 	 * de scalat
 	 */
+
+	int16_t x1 = 0;
+	int16_t y1 = 0;
+
+	x1 = (int16_t)((entity->x1)*factor);
+	y1 = (int16_t)((entity->y1)*factor);
+
+	if((entity->x0+x1) > 320 || (entity->y0+y1)>480)
+	{
+		return;
+	}
 
 	FRESULT res;
 	char *scalFilePath;
@@ -665,12 +726,7 @@ void scaling_entity(ENTITY *entity, const float factor)
 
 
 	uint8_t *data = malloc(sizeof(uint8_t)*3072);
-	int16_t x1 = 0;
-	int16_t y1 = 0;
 	int16_t index = 0;
-
-	x1 = (int16_t)((entity->x1)*factor);
-	y1 = (int16_t)((entity->y1)*factor);
 
 
 
@@ -784,7 +840,7 @@ void rotate_entity(ENTITY *entity, int theta)
 
 	/*Vom elimina din campul vizual imaginea curenta*/
 
-	draw_rectangle(entity->x0, entity->y0, entity->x1, entity->y1, BackGroundColor);
+	erase_entity(*entity);
 
 	/*Aflam initial coordonatele pivotului de referinta*/
 
@@ -829,12 +885,26 @@ void rotate_entity(ENTITY *entity, int theta)
 				pixel[1] = entity->ST.SD.data[k+1];
 				pixel[2] = entity->ST.SD.data[k+2];
 
-				/*Test pentru 90 de grade*/
 
-				rotPosX = -i + pivotX;
-				rotPosY =  j + pivotY;
+				switch(theta)
+				{
+					case 90:
+						rotPosX = -i + pivotX;
+						rotPosY =  j + pivotY;
+						break;
+					case 180:
+						rotPosX = -i + pivotX;
+						rotPosY = -j + pivotY;
+						break;
+					case 270:
+						rotPosX = i + pivotX;
+						rotPosY = j + pivotY;
+						break;
+					default:
+						break;
+				}
 
-				draw_pixel_data(rotPosX, rotPosY, pixel);
+				draw_pixel_data(rotPosX, rotPosY, pixel); /*i->Y si j->X*/
 
 				j++;
 				flagPixel = 0;
@@ -851,7 +921,14 @@ void rotate_entity(ENTITY *entity, int theta)
 }
 
 
+void erase_entity(ENTITY entity)
+{
+	/*
+	 * Fucntie pentru a sterge entitatea din campul vizual
+	 */
 
+	draw_rectangle_slow(entity.x0, entity.y0, entity.x1+1, entity.y1, BackGroundColor);
+}
 
 
 

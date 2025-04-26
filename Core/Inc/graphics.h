@@ -94,6 +94,7 @@ void print_string(uint16_t x, uint16_t y, char* string, uint16_t fontColor, uint
 void draw_horizontal_line(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t color);
 void draw_vertical_line(uint16_t x0, uint16_t y0, uint16_t y1, uint16_t color);
 void draw_rectangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color);
+void draw_rectangle_slow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color);
 
 void init_entity_sd(ENTITY *entity);
 void free_entity_sd(ENTITY *entity);
@@ -102,6 +103,7 @@ void translation_entity(ENTITY *const restrict entity, int16_t x, int16_t y, boo
 void translation_test(ENTITY *entity, uint8_t step, uint16_t delay);
 void scaling_entity(ENTITY *entity, const float factor);
 void rotate_entity(ENTITY *entity, int theta);
+void erase_entity(ENTITY entity);
 
 #endif /* INC_GRAPHICS_H_ */
 

@@ -10,12 +10,12 @@
 
 #include<stdint.h>
 
-#define DxRight   0x01   /*0b0000 0001*/
-#define DxLeft    0x02   /*0b0000 0010*/
-#define DxUp      0x04   /*0b0000 0100*/
-#define DxDown    0x08   /*0b0000 1000*/
-#define DxStart   0x10   /*0b0001 0000*/
-#define DxSelect  0x20   /*0b0010 0000*/
+#define DxRight   0x11   /*0b0001 0001*/
+#define DxLeft    0x33   /*0b0011 0011*/
+#define DxUp      0x55   /*0b0101 0101*/
+#define DxDown    0x77   /*0b0111 0111*/
+#define DxStart   0x99   /*0b1001 1001*/
+#define DxSelect  0xBB   /*0b1011 1011*/
 
 extern uint8_t dataController;
 extern uint8_t currentDx;

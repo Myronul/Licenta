@@ -296,13 +296,14 @@ void read_audio_file(char *filePathName, uint32_t *buffer, bool *flagAudioDone)
 	f_lseek(&file, currentPosition); /*Revenim la pozitia anterioara citirii*/
 
 
-	if(flagNewAudioFile == 1)
+	if(flagNewAudioFile == 1 || *flagAudioDone==1)
 	{
 		/*
 		 * Reactualizare valorilor statice pentru deschiderea unui nou
 		 * fisier audio
 		*/
 
+		*flagAudioDone=0;
 		flagNewAudioFile = 0;
 		currentFrame = 0;
 

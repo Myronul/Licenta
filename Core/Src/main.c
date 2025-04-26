@@ -158,6 +158,9 @@ void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi)
 		  	case DxStart:
 		  	  currentDx = DxStart;
 		  	  break;
+		  	case DxSelect:
+		  	  currentDx = DxSelect;
+		  	  break;
 		  	default:
 		  	  currentDx = 0x00;
 		  	  break;
@@ -437,12 +440,12 @@ int main(void)
   //play_audio_file("Audio/king.txt"); //doremi mine songita song22 king acoustic bambina
 
 
-  fill_screen1(0xF100);
-  HAL_Delay(1000);
-  fill_screen2(0xF00F);
-  HAL_Delay(1000);
+  //fill_screen1(0xF100);
+  //HAL_Delay(1000);
+  //fill_screen2(0xF00F);
+  //HAL_Delay(1000);
   fill_screen2(0xFFFF);
-  HAL_Delay(1000);
+  //HAL_Delay(1000);
 
   unsigned int startTick = 0;
   unsigned int endTick = 0;
@@ -457,6 +460,7 @@ int main(void)
 
   BackGroundColor = 0xFFFF;
 
+
   entity.x0 = 100;
   entity.y0 = 100;
   entity.id = 0;
@@ -464,18 +468,20 @@ int main(void)
   draw_entity(&entity);
   HAL_Delay(1000);
   scaling_entity(&entity, 38);
-  draw_rectangle(entity.x0, entity.y0, entity.x1, entity.y1, BackGroundColor);
+  erase_entity(entity);
   draw_entity(&entity);
   HAL_Delay(1000);
 
   //--------------------------------------------
 
   HAL_Delay(1000);
-  //fill_screen2(0xFFFF);
-
+  fill_screen2(0xFFFF);
   rotate_entity(&entity, 90);
-
-  HAL_Delay(1000);
+  HAL_Delay(5000);
+  rotate_entity(&entity, 180);
+  HAL_Delay(5000);
+  rotate_entity(&entity, 270);
+  HAL_Delay(5000);
 
   //---------------------------------------------
 
@@ -495,7 +501,7 @@ int main(void)
   fill_screen2(0xFFFF);
   entity.x0 = 0;
   entity.y0 = 0;
-  assign_file_path_entity(&entity, "graphic/img8.bin");
+  assign_file_path_entity(&entity, "graphic/img9.bin");
   draw_entity(&entity);
   HAL_Delay(1000);
   fill_screen2(0xFFFF);
