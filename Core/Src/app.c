@@ -163,6 +163,135 @@ static void demo_os_1()
 }
 
 
+static void int_to_string(uint8_t n, char *s)
+{
+	uint16_t divider = 1;
+	uint8_t temp = n;
+
+	uint8_t c = 0;
+	uint8_t i = 0;
+
+	if(n == 0)
+	{
+		s[i++] = '0';
+		s[i] = '\0';
+		return;
+	}
+
+	while((n/divider)>=10)
+	{
+		divider *= 10;
+	}
+
+	do
+	{
+		c = n/divider;
+		s[i++] = c + '0';
+
+		n %= divider;
+		divider /= 10;
+
+	}while(divider != 0);
+
+	s[i] = '\0';
+
+}
+
+static void translation_controller_test()
+{
+	fill_screen2(BackGroundColor);
+
+	ENTITY entity;
+	entity.x0 = 0;
+	entity.y0 = 300;
+	entity.x1 = 64;
+	entity.y1 = 64;
+	entity.id = 0x80;
+	entity.ST.color = 0xF100;
+
+	uint8_t step = 1;
+	char stepScore[4];
+	currentDx = 0;
+
+	draw_entity(&entity);
+	int_to_string(step, stepScore);
+	print_string(32, 460, stepScore, BLACK, BackGroundColor);
+
+	while(1)
+	{
+
+		switch(currentDx)
+		{
+			case DxRight:
+				translation_entity(&entity, entity.x0+step, entity.y0, 0);
+				currentDx = 0;
+				break;
+			case DxLeft:
+				translation_entity(&entity, entity.x0-step, entity.y0, 0);
+				currentDx = 0;
+				break;
+			case DxUp:
+				translation_entity(&entity, entity.x0, entity.y0-step, 0);
+				currentDx = 0;
+				break;
+			case DxDown:
+				translation_entity(&entity, entity.x0, entity.y0+step, 0);
+				currentDx = 0;
+				break;
+			case DxSelect:
+				while(currentDx == DxSelect);
+					switch(currentDx)
+					{
+						case DxUp:
+							if(step >= 32)
+							{
+								currentDx = 0;
+								break;
+							}
+							else
+							{
+								step++;
+								print_string(32, 460, "   ", BackGroundColor, BackGroundColor);
+								int_to_string(step, stepScore);
+								print_string(32, 460, stepScore, BLACK, BackGroundColor);
+								currentDx = 0;
+								break;
+							}
+						case DxDown:
+							if(step <= 1)
+							{
+								currentDx = 0;
+								break;
+							}
+							else
+							{
+								step--;
+								print_string(32, 460, "   ", BackGroundColor, BackGroundColor);
+								int_to_string(step, stepScore);
+								print_string(32, 460, stepScore, BLACK, BackGroundColor);
+								currentDx = 0;
+								break;
+							}
+						case DxRight:
+							pback = 1;
+							currentDx = 0;
+							HAL_Delay(50);
+							return;
+						default:
+							break;
+					}
+			default:
+				currentDx = 0;
+				break;
+		}
+
+		HAL_Delay(25);
+
+	}
+
+}
+
+
 static void scaling_test(void)
 {
 	/*
@@ -486,6 +615,7 @@ static void list_graphics(void)
 					scaling_test();
 					break;
 				case 2:
+					translation_controller_test();
 					break;
 				case 3:
 					rotation_test();
@@ -516,12 +646,148 @@ static void list_graphics(void)
 }
 
 
-static void list_songs(void)
+static void set_audio_effects_gui(void)
 {
-	/*
-	 * Interfata pentru selectarea si redarea unor
-	 * melodii alese de utilizator
-	 */
+	init_cursor();
+
+	fill_screen1(BackGroundColor);
+	cursor.y0 = 16;
+	cursor.x0 = 32;
+
+	print_string(cursor.x0, cursor.y0, "Choose Filter:", BLACK, BackGroundColor);
+	cursor.y0 += 32;
+	print_string(cursor.x0, cursor.y0, "Reverb", BLACK, BackGroundColor);
+	cursor.y0 += 16;
+	print_string(cursor.x0, cursor.y0, "Vibrato", BLACK, BackGroundColor);
+	cursor.y0 += 16;
+	print_string(cursor.x0, cursor.y0, "Echo", BLACK, BackGroundColor);
+	cursor.y0 += 16;
+	print_string(cursor.x0, cursor.y0, "No Filters", BLACK, BackGroundColor);
+
+	init_cursor();
+}
+
+
+static void list_audio_effects(void)
+{
+
+	pback = 1;
+
+	cursor.x0 = 0;
+	cursor.y0 = 48;
+
+	int16_t x = 0;
+	int16_t y = 48;
+
+	uint8_t Q = 0;
+
+	uint8_t nrOptions = 4;
+	nrOptions--; /*0 inclus*/
+
+	currentDx = 0;
+
+	while(1)
+	{
+
+		if(pback == 1)
+		{
+			/*
+			 * Initializare gui si pt cazul in care ne intaorcem
+			 * dintr-o interfata selectat
+			 */
+
+			set_audio_effects_gui();
+
+			cursor.x0 = 0;
+			cursor.y0 = 48;
+
+			x = 0;
+			y = 48;
+
+			Q = 0;
+
+			draw_entity(&cursor);
+
+			pback = 0;
+		}
+
+		if(currentDx == DxDown)
+		{
+			if(Q == nrOptions)
+			{
+				Q = 0;
+				y = 48;
+			}
+
+			else
+			{
+				Q++;
+				y += 16;
+			}
+
+			translation_entity(&cursor, x, y, 0);
+			currentDx = 0;
+		}
+
+		if(currentDx == DxUp)
+		{
+			if(Q == 0)
+			{
+				Q = nrOptions;
+				y = 48+16*nrOptions;
+			}
+			else
+			{
+				Q--;
+				y -= 16;
+			}
+
+			translation_entity(&cursor, x, y, 0);
+			currentDx = 0;
+		}
+
+		if(currentDx == DxSelect)
+		{
+			currentDx = 0;
+
+			switch(Q)
+			{
+				case 0:
+					play_audio_file_reverb("Audio/acoustic.txt");
+					break;
+				case 1:
+					play_audio_file_vibrato("Audio/acoustic.txt");
+					break;
+				case 2:
+					play_audio_file_echo("Audio/acoustic.txt", 20, 0.8);
+					break;
+				case 3:
+					play_audio_file("Audio/acoustic.txt");
+					break;
+				default:
+					break;
+
+			}
+
+			currentDx = 0;
+
+		}
+
+		if(currentDx == DxRight)
+		{
+			pback = 1;
+			currentDx = 0;
+			return;
+		}
+
+
+	}
+}
+
+
+static void set_audio_player_gui(void)
+{
+	init_cursor();
 
 	fill_screen1(BackGroundColor);
 	cursor.y0 = 16;
@@ -538,6 +804,17 @@ static void list_songs(void)
 	print_string(cursor.x0, cursor.y0, "Song4", BLACK, BackGroundColor);
 
 	init_cursor();
+}
+
+
+static void list_audio_player(void)
+{
+	/*
+	 * Interfata pentru selectarea si redarea unor
+	 * melodii alese de utilizator
+	 */
+
+	pback = 1;
 
 	cursor.x0 = 0;
 	cursor.y0 = 48;
@@ -550,10 +827,33 @@ static void list_songs(void)
 	uint8_t nrOptions = 4;
 	nrOptions--; /*0 inclus*/
 
-	draw_entity(&cursor);
+	currentDx = 0;
 
 	while(1)
 	{
+
+		if(pback == 1)
+		{
+			/*
+			 * Initializare gui si pt cazul in care ne intaorcem
+			 * dintr-o interfata selectat
+			 */
+
+			set_audio_player_gui();
+
+			cursor.x0 = 0;
+			cursor.y0 = 48;
+
+			x = 0;
+			y = 48;
+
+			Q = 0;
+
+			draw_entity(&cursor);
+
+			pback = 0;
+		}
+
 		if(currentDx == DxDown)
 		{
 			if(Q == nrOptions)
@@ -612,6 +912,8 @@ static void list_songs(void)
 
 			}
 
+			currentDx = 0;
+
 		}
 
 		if(currentDx == DxRight)
@@ -626,6 +928,136 @@ static void list_songs(void)
 
 
 }
+
+
+static void set_audio_gui(void)
+{
+	init_cursor();
+
+	fill_screen1(BackGroundColor);
+	cursor.y0 = 16;
+	cursor.x0 = 32;
+
+	print_string(cursor.x0, cursor.y0, "Choose Mode", BLACK, BackGroundColor);
+	cursor.y0 += 32;
+	print_string(cursor.x0, cursor.y0, "Music PLayer", BLACK, BackGroundColor);
+	cursor.y0 += 16;
+	print_string(cursor.x0, cursor.y0, "Audio Effects", BLACK, BackGroundColor);
+
+	init_cursor();
+}
+
+
+static void list_audio(void)
+{
+
+	pback = 1;
+
+	cursor.x0 = 0;
+	cursor.y0 = 48;
+
+	int16_t x = 0;
+	int16_t y = 48;
+
+	uint8_t Q = 0;
+
+	uint8_t nrOptions = 2;
+	nrOptions--; /*0 inclus*/
+
+	currentDx = 0;
+
+	while(1)
+	{
+		if(pback == 1)
+		{
+			/*
+			 * Initializare gui si pt cazul in care ne intaorcem
+			 * dintr-o interfata selectat
+			 */
+
+			set_audio_gui();
+
+			cursor.x0 = 0;
+			cursor.y0 = 48;
+
+			x = 0;
+			y = 48;
+
+			Q = 0;
+
+			draw_entity(&cursor);
+
+			pback = 0;
+		}
+
+		if(currentDx == DxDown)
+		{
+			if(Q == nrOptions)
+			{
+				Q = 0;
+				y = 48;
+			}
+
+			else
+			{
+				Q++;
+				y += 16;
+			}
+
+			translation_entity(&cursor, x, y, 0);
+			currentDx = 0;
+		}
+
+		if(currentDx == DxUp)
+		{
+			if(Q == 0)
+			{
+				Q = nrOptions;
+				y = 48+16*nrOptions;
+			}
+			else
+			{
+				Q--;
+				y -= 16;
+			}
+
+			translation_entity(&cursor, x, y, 0);
+			currentDx = 0;
+		}
+
+		if(currentDx == DxSelect)
+		{
+			currentDx = 0;
+
+			switch(Q)
+			{
+				case 0:
+					list_audio_player();
+					break;
+				case 1:
+					list_audio_effects();
+					break;
+				default:
+					break;
+
+			}
+
+			currentDx = 0;
+
+		}
+
+		if(currentDx == DxRight)
+		{
+			pback = 1;
+			currentDx = 0;
+			return;
+		}
+
+
+	}
+}
+
+
 
 
 static void set_main_gui(void)
@@ -646,7 +1078,7 @@ static void set_main_gui(void)
 
 	print_string(cursor.x0, cursor.y0, "My Menu", BLACK, BackGroundColor);
 	cursor.y0 += 32;
-	print_string(cursor.x0, cursor.y0, "Operating Systems", BLACK, BackGroundColor);
+	print_string(cursor.x0, cursor.y0, "Operating System(boot)", BLACK, BackGroundColor);
 	cursor.y0 += 16;
 	print_string(cursor.x0, cursor.y0, "Graphics", BLACK, BackGroundColor);
 	cursor.y0 += 16;
@@ -680,7 +1112,6 @@ void main_app()
 	uint8_t Q = 0;
 
 	uint8_t nrOptions = 4;
-
 	nrOptions--; /*0 inclus*/
 
 	while(1)
@@ -756,7 +1187,7 @@ void main_app()
 					list_graphics();
 					break;
 				case 2:
-					list_songs();
+					list_audio();
 					break;
 				case 3:
 					break;

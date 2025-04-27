@@ -137,7 +137,7 @@ void play_audio_file_vibrato(char *path)
 
 	buffer = malloc(sizeof(uint32_t)*2048);
 
-	bool flagAudioDone = 0;
+	bool flagAudioDone = 1;
 	flagBuffer = 1; /*Incepem din a doua jumatate*/
 
 	int8_t delay = 0;
@@ -152,12 +152,13 @@ void play_audio_file_vibrato(char *path)
 		return;
 	}
 
+	currentDx = 0;
 	read_audio_file(path, buffer, &flagAudioDone); /*Citire in prima jumatate a bufferului -> 1024 de elemente*/
 	k = (k+1) % 8;
 
 	HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, buffer, 2048, DAC_ALIGN_12B_R);
 
-	while(!flagAudioDone)
+	while(!flagAudioDone && currentDx!=DxSelect)
 	{
 		read_audio_file(path, buffer+1024, &flagAudioDone);
 		vibrato_filter(delay);
@@ -234,6 +235,8 @@ void play_audio_file_vibrato(char *path)
 
 	while(flagDmaDAC == 0);
 	flagDmaDAC = 0;
+	currentDx = 0;
+	flagAudioDone = 1;
 
 	HAL_DAC_Stop_DMA(&hdac, DAC_CHANNEL_1);
 
@@ -308,7 +311,7 @@ void play_audio_file_echo(char *path, int8_t delay, float alpha)
 
 	buffer = malloc(sizeof(uint32_t)*2048);
 
-	bool flagAudioDone = 0;
+	bool flagAudioDone = 1;
 	flagBuffer = 1; /*Incepem din a doua jumatate*/
 
 
@@ -318,11 +321,12 @@ void play_audio_file_echo(char *path, int8_t delay, float alpha)
 		return;
 	}
 
+	currentDx = 0;
 	read_audio_file(path, buffer, &flagAudioDone); /*Citire in prima jumatate a bufferului -> 1024 de elemente*/
 
 	HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, buffer, 2048, DAC_ALIGN_12B_R);
 
-	while(!flagAudioDone)
+	while(!flagAudioDone && currentDx!=DxSelect)
 	{
 		read_audio_file(path, buffer+1024, &flagAudioDone);
 		echo_filter(delay, alpha);
@@ -339,6 +343,8 @@ void play_audio_file_echo(char *path, int8_t delay, float alpha)
 
 	while(flagDmaDAC == 0);
 	flagDmaDAC = 0;
+	currentDx = 0;
+	flagAudioDone = 1;
 
 	HAL_DAC_Stop_DMA(&hdac, DAC_CHANNEL_1);
 
@@ -432,7 +438,7 @@ void play_audio_file_reverb(char *path)
 
 	buffer = malloc(sizeof(uint32_t)*2048);
 
-	bool flagAudioDone = 0;
+	bool flagAudioDone = 1;
 	flagBuffer = 1; /*Incepem din a doua jumatate*/
 
 
@@ -442,11 +448,12 @@ void play_audio_file_reverb(char *path)
 		return;
 	}
 
+	currentDx = 0;
 	read_audio_file(path, buffer, &flagAudioDone); /*Citire in prima jumatate a bufferului -> 1024 de elemente*/
 
 	HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, buffer, 2048, DAC_ALIGN_12B_R);
 
-	while(!flagAudioDone)
+	while(!flagAudioDone && currentDx!=DxSelect)
 	{
 		read_audio_file(path, buffer+1024, &flagAudioDone);
 		reverb_filter();
@@ -463,6 +470,8 @@ void play_audio_file_reverb(char *path)
 
 	while(flagDmaDAC == 0);
 	flagDmaDAC = 0;
+	currentDx = 0;
+	flagAudioDone = 1;
 
 	HAL_DAC_Stop_DMA(&hdac, DAC_CHANNEL_1);
 
