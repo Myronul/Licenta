@@ -206,19 +206,19 @@ void controller_test()
 		switch(currentDx)
 		{
 			case DxRight:
-				translation_entity(&entity, entity.x0+32, entity.y0, 1);
+				translation_entity(&entity, entity.x0+32, entity.y0);
 				currentDx = 0;
 				break;
 			case DxLeft:
-				translation_entity(&entity, entity.x0-32, entity.y0, 1);
+				translation_entity(&entity, entity.x0-32, entity.y0);
 				currentDx = 0;
 				break;
 			case DxUp:
-				translation_entity(&entity, entity.x0, entity.y0-32, 1);
+				translation_entity(&entity, entity.x0, entity.y0-32);
 				currentDx = 0;
 				break;
 			case DxDown:
-				translation_entity(&entity, entity.x0, entity.y0+32, 1);
+				translation_entity(&entity, entity.x0, entity.y0+32);
 				currentDx = 0;
 				break;
 			default:
@@ -588,13 +588,13 @@ int main(void)
   translation_test(&entity, 1, 0);
 
   HAL_Delay(500);
-  translation_entity(&entity, entity.x0+100, entity.y0+100, 0);//, 0xF100);
+  translation_entity(&entity, entity.x0+100, entity.y0+100);//, 0xF100);
   HAL_Delay(2000);
-  translation_entity(&entity, entity.x0+32, entity.y0+32, 0);//, 0xF100);
+  translation_entity(&entity, entity.x0+32, entity.y0+32);//, 0xF100);
   HAL_Delay(500);
-  translation_entity(&entity, entity.x0+12, entity.y0+32, 0);//, 0xF100);
+  translation_entity(&entity, entity.x0+12, entity.y0+32);//, 0xF100);
   HAL_Delay(500);
-  translation_entity(&entity, entity.x0+12, entity.y0, 0);//, 0xF100);
+  translation_entity(&entity, entity.x0+12, entity.y0);//, 0xF100);
   HAL_Delay(500);
 
 

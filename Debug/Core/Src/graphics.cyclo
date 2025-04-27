@@ -14,8 +14,8 @@
 ../Core/Src/graphics.c:414:6:init_entity_sd	1
 ../Core/Src/graphics.c:425:6:free_entity_sd	1
 ../Core/Src/graphics.c:432:6:draw_entity	9
-../Core/Src/graphics.c:541:6:translation_entity	17
-../Core/Src/graphics.c:627:6:translation_test	5
-../Core/Src/graphics.c:684:6:scaling_entity	12
-../Core/Src/graphics.c:829:6:rotate_entity	10
-../Core/Src/graphics.c:924:6:erase_entity	1
+../Core/Src/graphics.c:541:6:translation_entity	23
+../Core/Src/graphics.c:643:6:translation_test	5
+../Core/Src/graphics.c:700:6:scaling_entity	12
+../Core/Src/graphics.c:845:6:rotate_entity	10
+../Core/Src/graphics.c:940:6:erase_entity	1

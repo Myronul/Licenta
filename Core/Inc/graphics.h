@@ -99,7 +99,7 @@ void draw_rectangle_slow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uin
 void init_entity_sd(ENTITY *entity);
 void free_entity_sd(ENTITY *entity);
 void draw_entity(ENTITY *entity);
-void translation_entity(ENTITY *const restrict entity, int16_t x, int16_t y, bool TurnOnStep);//, uint16_t color);
+void translation_entity(ENTITY *const restrict entity, int16_t x, int16_t y);//, uint16_t color);
 void translation_test(ENTITY *entity, uint8_t step, uint16_t delay);
 void scaling_entity(ENTITY *entity, const float factor);
 void rotate_entity(ENTITY *entity, int theta);

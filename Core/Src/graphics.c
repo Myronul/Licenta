@@ -538,7 +538,7 @@ void draw_entity(ENTITY *entity)
 
 
 
-void translation_entity(ENTITY *const restrict entity, int16_t x, int16_t y, bool TurnOnStep)
+void translation_entity(ENTITY *const restrict entity, int16_t x, int16_t y)
 {
 	/*
 	 * Functie pentru realizarea translatiei unei imagini (entitati)
@@ -555,6 +555,22 @@ void translation_entity(ENTITY *const restrict entity, int16_t x, int16_t y, boo
 
 		return;
 	}
+
+	bool TurnOnStep = 0;
+
+	if(((abs(x-entity->x0)<entity->x1) && ((abs(x-entity->x0)*(entity->y1)<=1024)) && ((abs(x-entity->x0)!=0)))||
+	   ((abs(y-entity->y0)<entity->y1) && ((abs(y-entity->y0)*(entity->x1)<=1024)) && ((abs(y-entity->y0)!=0))))
+	{
+		/*
+		 * Verificam daca ne aflam in aceeasi arie de acoperire in translatie
+		 * si daca respectiva arie are maxim 1024 de pixeli, pentru a face translatie
+		 * eficient
+		 */
+
+		TurnOnStep = 1;
+
+	}
+
 
 
 	ENTITY temp = *entity;
@@ -615,7 +631,7 @@ void translation_entity(ENTITY *const restrict entity, int16_t x, int16_t y, boo
 		{
 			/*Pentru orice alt caz (deplasare pe diagonala sau aleatoriu)*/
 			mutex = 1;
-			draw_rectangle(temp.x0, temp.y0, temp.x1, temp.y1, BackGroundColor);
+			draw_rectangle_slow(temp.x0, temp.y0, temp.x1, temp.y1, BackGroundColor);
 			draw_entity(entity);
 			mutex = 0;
 		}
@@ -632,7 +648,7 @@ void translation_test(ENTITY *entity, uint8_t step, uint16_t delay)
 	{
 		while((entity->x0 + entity->x1) < LCD_Width)
 		{
-			translation_entity(entity, entity->x0+step, entity->y0, 1);//, color);
+			translation_entity(entity, entity->x0+step, entity->y0);//, color);
 			HAL_Delay(delay);
 		}
 		mutex = 1;
@@ -643,7 +659,7 @@ void translation_test(ENTITY *entity, uint8_t step, uint16_t delay)
 		while((entity->y0 + entity->y1) < LCD_Length)
 		{
 
-			translation_entity(entity, entity->x0, entity->y0+step, 1);//, color);
+			translation_entity(entity, entity->x0, entity->y0+step);//, color);
 			HAL_Delay(delay);
 		}
 
@@ -654,7 +670,7 @@ void translation_test(ENTITY *entity, uint8_t step, uint16_t delay)
 
 		while((entity->x0 - step) > 0)
 		{
-			translation_entity(entity, entity->x0-step, entity->y0, 1);//, color);
+			translation_entity(entity, entity->x0-step, entity->y0);//, color);
 			HAL_Delay(delay);
 		}
 
@@ -667,7 +683,7 @@ void translation_test(ENTITY *entity, uint8_t step, uint16_t delay)
 
 		while((entity->y0 - step) > 0)
 		{
-			translation_entity(entity, entity->x0, entity->y0-step, 1);//, color);
+			translation_entity(entity, entity->x0, entity->y0-step);//, color);
 			HAL_Delay(delay);
 		}
 		entity->ST.color = 0xFFFF;

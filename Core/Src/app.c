@@ -33,19 +33,19 @@ static void controller_test()
 		switch(currentDx)
 		{
 			case DxRight:
-				translation_entity(&entity, entity.x0+32, entity.y0, 1);
+				translation_entity(&entity, entity.x0+32, entity.y0);
 				currentDx = 0;
 				break;
 			case DxLeft:
-				translation_entity(&entity, entity.x0-32, entity.y0, 1);
+				translation_entity(&entity, entity.x0-32, entity.y0);
 				currentDx = 0;
 				break;
 			case DxUp:
-				translation_entity(&entity, entity.x0, entity.y0-32, 1);
+				translation_entity(&entity, entity.x0, entity.y0-32);
 				currentDx = 0;
 				break;
 			case DxDown:
-				translation_entity(&entity, entity.x0, entity.y0+32, 1);
+				translation_entity(&entity, entity.x0, entity.y0+32);
 				currentDx = 0;
 				break;
 			default:
@@ -223,19 +223,19 @@ static void translation_controller_test()
 		switch(currentDx)
 		{
 			case DxRight:
-				translation_entity(&entity, entity.x0+step, entity.y0, 0);
+				translation_entity(&entity, entity.x0+step, entity.y0);
 				currentDx = 0;
 				break;
 			case DxLeft:
-				translation_entity(&entity, entity.x0-step, entity.y0, 0);
+				translation_entity(&entity, entity.x0-step, entity.y0);
 				currentDx = 0;
 				break;
 			case DxUp:
-				translation_entity(&entity, entity.x0, entity.y0-step, 0);
+				translation_entity(&entity, entity.x0, entity.y0-step);
 				currentDx = 0;
 				break;
 			case DxDown:
-				translation_entity(&entity, entity.x0, entity.y0+step, 0);
+				translation_entity(&entity, entity.x0, entity.y0+step);
 				currentDx = 0;
 				break;
 			case DxSelect:
@@ -315,19 +315,19 @@ static void scaling_test(void)
 		switch(currentDx)
 		{
 			case DxRight:
-				translation_entity(&entity, entity.x0+16, entity.y0, 0);
+				translation_entity(&entity, entity.x0+16, entity.y0);
 				currentDx = 0;
 				break;
 			case DxLeft:
-				translation_entity(&entity, entity.x0-16, entity.y0, 0);
+				translation_entity(&entity, entity.x0-16, entity.y0);
 				currentDx = 0;
 				break;
 			case DxUp:
-				translation_entity(&entity, entity.x0, entity.y0-16, 0);
+				translation_entity(&entity, entity.x0, entity.y0-16);
 				currentDx = 0;
 				break;
 			case DxDown:
-				translation_entity(&entity, entity.x0, entity.y0+16, 0);
+				translation_entity(&entity, entity.x0, entity.y0+16);
 				currentDx = 0;
 				break;
 			case DxSelect:
@@ -581,7 +581,7 @@ static void list_graphics(void)
 				y += 16;
 			}
 
-			translation_entity(&cursor, x, y, 0);
+			translation_entity(&cursor, x, y);
 			currentDx = 0;
 		}
 
@@ -598,7 +598,7 @@ static void list_graphics(void)
 				y -= 16;
 			}
 
-			translation_entity(&cursor, x, y, 0);
+			translation_entity(&cursor, x, y);
 			currentDx = 0;
 		}
 
@@ -725,7 +725,7 @@ static void list_audio_effects(void)
 				y += 16;
 			}
 
-			translation_entity(&cursor, x, y, 0);
+			translation_entity(&cursor, x, y);
 			currentDx = 0;
 		}
 
@@ -742,7 +742,7 @@ static void list_audio_effects(void)
 				y -= 16;
 			}
 
-			translation_entity(&cursor, x, y, 0);
+			translation_entity(&cursor, x, y);
 			currentDx = 0;
 		}
 
@@ -868,7 +868,7 @@ static void list_audio_player(void)
 				y += 16;
 			}
 
-			translation_entity(&cursor, x, y, 0);
+			translation_entity(&cursor, x, y);
 			currentDx = 0;
 		}
 
@@ -885,7 +885,7 @@ static void list_audio_player(void)
 				y -= 16;
 			}
 
-			translation_entity(&cursor, x, y, 0);
+			translation_entity(&cursor, x, y);
 			currentDx = 0;
 		}
 
@@ -1004,7 +1004,7 @@ static void list_audio(void)
 				y += 16;
 			}
 
-			translation_entity(&cursor, x, y, 0);
+			translation_entity(&cursor, x, y);
 			currentDx = 0;
 		}
 
@@ -1021,7 +1021,7 @@ static void list_audio(void)
 				y -= 16;
 			}
 
-			translation_entity(&cursor, x, y, 0);
+			translation_entity(&cursor, x, y);
 			currentDx = 0;
 		}
 
@@ -1153,7 +1153,7 @@ void main_app()
 				y += 16;
 			}
 
-			translation_entity(&cursor, x, y, 0);
+			translation_entity(&cursor, x, y);
 			currentDx = 0;
 		}
 
@@ -1170,7 +1170,7 @@ void main_app()
 				y -= 16;
 			}
 
-			translation_entity(&cursor, x, y, 0);
+			translation_entity(&cursor, x, y);
 			currentDx = 0;
 		}
 
