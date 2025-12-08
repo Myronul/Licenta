@@ -1,4 +1,4 @@
-Codul sursa in curenta dezvoltare se afla in: Core/Inc si Core/Src (modularizat in bibliotecile de functii)
+Codul sursa dezvoltat se afla in: Core/Inc si Core/Src (modularizat in bibliotecile de functii)
 
 Universitatea “Politehnica” din Bucureşti
 Facultatea de Electronică, Telecomunicaţii şi Tehnologia Informaţiei
