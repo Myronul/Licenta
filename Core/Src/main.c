@@ -233,8 +233,7 @@ void controller_test()
 }
 
 
-
-volatile void Task0()
+void Task0()
 {
 
 	ENTITY entity;
@@ -256,7 +255,7 @@ volatile void Task0()
     }
 }
 
-volatile void Task1()
+void Task1()
 {
 
     while(1)
@@ -292,7 +291,7 @@ volatile void Task1()
 }
 */
 
-volatile void Task2()
+void Task2()
 {
 	ENTITY entity;
 	entity.x0 = 0;
@@ -317,7 +316,7 @@ volatile void Task2()
 }
 
 
-volatile void Task3()
+void Task3()
 {
 	while(1)
 	{
@@ -325,7 +324,7 @@ volatile void Task3()
 	}
 }
 
-volatile void Task4()
+void Task4()
 {
 	while(1)
 	{
@@ -334,7 +333,7 @@ volatile void Task4()
 	}
 }
 
-volatile void Task5()
+void Task5()
 {
 	while(1)
 	{
